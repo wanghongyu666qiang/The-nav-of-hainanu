@@ -1,15 +1,15 @@
-#include "Graph.h"
+﻿#include "Graph.h"
 #include <queue>
 #include <iostream>
 using namespace std;
 
-void getshortestpath(const Graph& g, int startIndex, int endIndex, int userType) {//采用dijistra算法
+void getshortestpath(const Graph& g, int startIndex, int endIndex, int userType) {//閲囩敤dijistra绠楁硶
     vector<int> result;
-    vector<int> path(g.scenes.size()); // 存储路径
-    vector<int> dist(g.scenes.size()); // 存储距离
-    vector<int> visited(g.scenes.size()); // 存储访问状态,0表示未访问，1表示已访问
+    vector<int> path(g.scenes.size()); // 瀛樺偍璺緞
+    vector<int> dist(g.scenes.size()); // 瀛樺偍璺濈
+    vector<int> visited(g.scenes.size()); // 瀛樺偍璁块棶鐘舵€?0琛ㄧず鏈闂紝1琛ㄧず宸茶闂?
     
-    //全部用动态数组，防止环境报错
+    //鍏ㄩ儴鐢ㄥ姩鎬佹暟缁勶紝闃叉鐜鎶ラ敊
     for(int i=0;i<g.scenes.size();i++){
         dist[i]=g.scenes[startIndex].edges[i].weight; 
         visited[i]=0; 
@@ -17,11 +17,11 @@ void getshortestpath(const Graph& g, int startIndex, int endIndex, int userType)
         else path[i]=startIndex; 
     }
     visited[startIndex]=1;
-    path[startIndex]=-1;//完成初始化
+    path[startIndex]=-1;//瀹屾垚鍒濆鍖?
     
     for(int i=0;i<g.scenes.size()-1;i++)
     {
-        //找到没被访问的节点距离源点最近的节点
+        //鎵惧埌娌¤璁块棶鐨勮妭鐐硅窛绂绘簮鐐规渶杩戠殑鑺傜偣
         int mini=INT_MAX;
         int u=-1;
         for(int j=0;j<g.scenes.size();j++)
@@ -29,13 +29,13 @@ void getshortestpath(const Graph& g, int startIndex, int endIndex, int userType)
             if(visited[j]==0&&dist[j]<mini)
             {
                 mini=dist[j];
-                u=j;//u就是当前距离源点最近的节点
+                u=j;//u灏辨槸褰撳墠璺濈婧愮偣鏈€杩戠殑鑺傜偣
             }
-        }//找最近的节点的for
+        }//鎵炬渶杩戠殑鑺傜偣鐨刦or
         if(u==-1) break;
         else visited[u]=1;
 
-        //更新u的邻居节点的距离的for
+        //鏇存柊u鐨勯偦灞呰妭鐐圭殑璺濈鐨刦or
         for(int v=0;v<g.scenes[u].edges.size();v++)
         {
             if(visited[v]==0)
@@ -49,23 +49,23 @@ void getshortestpath(const Graph& g, int startIndex, int endIndex, int userType)
         }
     }
 
-    //从end开始回溯路径
-    int current=endIndex;//用来储存当前回溯到的节点
+    //浠巈nd寮€濮嬪洖婧矾寰?
+    int current=endIndex;//鐢ㄦ潵鍌ㄥ瓨褰撳墠鍥炴函鍒扮殑鑺傜偣
     if(dist[endIndex] == INT_MAX) {
-        cout << "无法到达目标景点！" << endl;
+        cout << "鏃犳硶鍒拌揪鐩爣鏅偣锛? << endl;
         return;
     }
     
     while(current!=-1)
     {
-        // 这里把内部的 index 转成外部真实 ID，再装入结果打印
+        // 杩欓噷鎶婂唴閮ㄧ殑 index 杞垚澶栭儴鐪熷疄 ID锛屽啀瑁呭叆缁撴灉鎵撳嵃
         result.push_back(g.scenes[current].id);
-        current=path[current];//回溯到上一个节点
+        current=path[current];//鍥炴函鍒颁笂涓€涓妭鐐?
     }
     std::reverse(result.begin(),result.end());
 
-    cout<<"最短路径长度为："<<dist[endIndex]<<endl;
-    cout<<"路径为：";
+    cout<<"鏈€鐭矾寰勯暱搴︿负锛?<<dist[endIndex]<<endl;
+    cout<<"璺緞涓猴細";
     for(int i=0;i<result.size();i++){
         cout<<result[i]<<" ";
     }
@@ -74,6 +74,6 @@ void getshortestpath(const Graph& g, int startIndex, int endIndex, int userType)
 
 vector<int> getTSPRoute(const Graph& g, int start, vector<int> targets, int userType) {
     vector<int> route;
-    // ... TSP 算法
+    // ... TSP 绠楁硶
     return route;
 }

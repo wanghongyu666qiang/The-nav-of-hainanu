@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 #include <vector>
 #include "algorithm/Graph.h"
 
@@ -7,25 +7,25 @@ using namespace std;
 int main() {
     CampusGraph graph;
 
-    // 1. 初始化数据 (务必确认txt路径正确)
+    // 1. 鍒濆鍖栨暟鎹?(鍔″繀纭txt璺緞姝ｇ‘)
     if (!graph.loadScenes("data/scene.txt") || !graph.loadRoads("data/road.txt")) {
-        cout << "数据加载失败！" << endl;
+        cout << "鏁版嵁鍔犺浇澶辫触锛? << endl;
         return 1;
     }
-    cout << "地图数据加载成功！" << endl;
+    cout << "鍦板浘鏁版嵁鍔犺浇鎴愬姛锛? << endl;
 
-    // 2. 测试你将要写的算法
-    int start = 1; // 1: 东大门
-    int end = 5;   // 5: 思源学堂
+    // 2. 娴嬭瘯浣犲皢瑕佸啓鐨勭畻娉?
+    int start = 1; // 1: 涓滃ぇ闂?
+    int end = 5;   // 5: 鎬濇簮瀛﹀爞
     
-    cout << "\n测试行人寻路 (由 1 去 5):" << endl;
+    cout << "\n娴嬭瘯琛屼汉瀵昏矾 (鐢?1 鍘?5):" << endl;
     vector<int> path = graph.getShortestPath(start, end, 1);
     
-    cout << "路线: ";
+    cout << "璺嚎: ";
     for (int id : path) {
         cout << graph.getSceneName(id) << " -> ";
     }
-    cout << "结束" << endl;
+    cout << "缁撴潫" << endl;
 
     return 0;
 }

@@ -1,4 +1,4 @@
-#include "Graph.h"
+﻿#include "Graph.h"
 #include <queue>
 #include <iostream>
 
@@ -6,11 +6,11 @@ using namespace std;
 
 
 
-vector<int> getShortestPath(const Graph& g, int start, int end, int userType) {//采用dijistra算法
+vector<int> getShortestPath(const Graph& g, int start, int end, int userType) {//閲囩敤dijistra绠楁硶
     vector<int> path;
-    int path[g.scenes.size()]; // 存储路径
-    int dist[g.scenes.size()]; // 存储距离
-    int visited[g.scenes.size()]; // 存储访问状态,0表示未访问，1表示已访问
+    int path[g.scenes.size()]; // 瀛樺偍璺緞
+    int dist[g.scenes.size()]; // 瀛樺偍璺濈
+    int visited[g.scenes.size()]; // 瀛樺偍璁块棶鐘舵€?0琛ㄧず鏈闂紝1琛ㄧず宸茶闂?
    for(int i=0;i<g.scenes.size();i++){
     dist[i]=g.scenes[start].edges[i].weight; 
     visited[i]=0; 
@@ -18,10 +18,10 @@ vector<int> getShortestPath(const Graph& g, int start, int end, int userType) {/
     else path[i]=start; 
    }
    visited[start]=1;
-   path[start]=-1;//完成初始化
+   path[start]=-1;//瀹屾垚鍒濆鍖?
    for(int i=0;i<g.scenes.size()-1;i++)
    {
-    //找到没被访问的节点距离源点最近的节点
+    //鎵惧埌娌¤璁块棶鐨勮妭鐐硅窛绂绘簮鐐规渶杩戠殑鑺傜偣
     int mini=INT_MAX;
     int u;
     for(int j=0;j<g.scenes.size();j++)
@@ -29,12 +29,12 @@ vector<int> getShortestPath(const Graph& g, int start, int end, int userType) {/
 if(visited[j]==0&&dist[j]<mini)
 {
     mini=dist[j];
-    u=j;//u就是当前距离源点最近的节点
+    u=j;//u灏辨槸褰撳墠璺濈婧愮偣鏈€杩戠殑鑺傜偣
 }
-    }//找最近的节点的for
+    }//鎵炬渶杩戠殑鑺傜偣鐨刦or
    visited[u]=1;
 
-   //更新u的邻居节点的距离的for
+   //鏇存柊u鐨勯偦灞呰妭鐐圭殑璺濈鐨刦or
    for(int v=0;v<g.scenes[u].edges.size();v++)
    {
 if(visited[v]==0)
@@ -45,7 +45,7 @@ if(visited[v]==0)
         path[v]=u;
     }
 }
-   }//更新u的邻居节点的距离for
+   }//鏇存柊u鐨勯偦灞呰妭鐐圭殑璺濈for
 }
 
 
@@ -53,6 +53,6 @@ if(visited[v]==0)
 
 vector<int> getTSPRoute(const Graph& g, int start, vector<int> targets, int userType) {
     vector<int> route;
-    // ... TSP 算法
+    // ... TSP 绠楁硶
     return route;
 }

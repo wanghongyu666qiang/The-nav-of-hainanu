@@ -1,4 +1,4 @@
-#include "../Graph.h"
+﻿#include "../Graph.h"
 #include <algorithm>
 
 using namespace std;
@@ -11,7 +11,7 @@ bool addRoad(Graph& g, int from, int to, int weight, int type) {
     }
     if (!fromFound || !toFound) return false;
 
-    // 添加双向边（加上避免重复的判断）
+    // 娣诲姞鍙屽悜杈癸紙鍔犱笂閬垮厤閲嶅鐨勫垽鏂級
     for (Scene& s : g.scenes) {
         if (s.id == from) {
             auto it = find_if(s.edges.begin(), s.edges.end(), [to](const Edge& e){ return e.to == to; });
@@ -33,7 +33,7 @@ bool updateRoad(Graph& g, int from, int to, int weight, int type) {
                 if (e.to == to) { e.weight = weight; e.roadType = type; found = true; }
             }
         }
-        // 由于是双向图，也要修改反向边
+        // 鐢变簬鏄弻鍚戝浘锛屼篃瑕佷慨鏀瑰弽鍚戣竟
         if (s.id == to) {
             for (Edge& e : s.edges) {
                 if (e.to == from) { e.weight = weight; e.roadType = type; found = true; }
@@ -47,7 +47,7 @@ bool updateRoad(Graph& g, int from, int to, int weight, int type) {
 bool deleteRoad(Graph& g, int from, int to) {
     bool found = false;
     for (Scene& s : g.scenes) {
-        if (s.id == from || s.id == to) { // 同时处理正反双向边
+        if (s.id == from || s.id == to) { // 鍚屾椂澶勭悊姝ｅ弽鍙屽悜杈?
             int targetId = (s.id == from) ? to : from;
             auto it = remove_if(s.edges.begin(), s.edges.end(), 
                 [targetId](const Edge& e) { return e.to == targetId; });

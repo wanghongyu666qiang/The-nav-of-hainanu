@@ -10,6 +10,7 @@
         "main.cpp",
         "algorithm/*.cpp",
         "algorithm/curd/*.cpp",
+        "-finput-charset=GBK",
         "-fexec-charset=GBK",
         "-o",
         "output/main.exe"

@@ -1,16 +1,16 @@
-#include "Graph.h"
+﻿#include "Graph.h"
 #include <queue>
 #include <iostream>
 
 using namespace std;
 
-// 这里只写 CampusGraph 类里的路径核心算法！
+// 杩欓噷鍙啓 CampusGraph 绫婚噷鐨勮矾寰勬牳蹇冪畻娉曪紒
 
 vector<int> CampusGraph::getShortestPath(int start, int end, int userType) {
     vector<int> path;
     
-    // 你可以直接读取 this->adjList 进行 Dijkstra 操作了！
-    // 比如：
+    // 浣犲彲浠ョ洿鎺ヨ鍙?this->adjList 杩涜 Dijkstra 鎿嶄綔浜嗭紒
+    // 姣斿锛?
     // for (const Edge& edge : adjList[currentNode]) { 
     //      if (userType == 1 && edge.roadType == 2) continue; 
     //      ... 
@@ -20,5 +20,5 @@ vector<int> CampusGraph::getShortestPath(int start, int end, int userType) {
 }
 
 vector<int> CampusGraph::getTSPRoute(int start, vector<int> targets, int userType) {
-    // ... TSP 算法
+    // ... TSP 绠楁硶
 }

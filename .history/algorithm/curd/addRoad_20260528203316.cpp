@@ -1,4 +1,4 @@
-#include "../Graph.h"
+﻿#include "../Graph.h"
 
 using namespace std;
 
@@ -10,7 +10,7 @@ bool addRoad(Graph& g, int from, int to, int weight, int type) {
     }
     if (fromIndex == -1 || toIndex == -1) return false;
 
-    // 修改邻接矩阵
+    // 淇敼閭绘帴鐭╅樀
     g.scenes[fromIndex].edges[toIndex] = {to, weight, type};
     g.scenes[toIndex].edges[fromIndex] = {from, weight, type};
     

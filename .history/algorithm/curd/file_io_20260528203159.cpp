@@ -1,61 +1,61 @@
-#include "../Graph.h"
+﻿#include "../Graph.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
 
 using namespace std;
 
-// 1. 从文件读取景点数据
+// 1. 浠庢枃浠惰鍙栨櫙鐐规暟鎹?
 bool loadScenes(Graph& g, const string& filename) {
     ifstream file(filename);
     if (!file.is_open()) return false;
 
     string line;
-    // 先读一行废弃掉（因为第一行是中文表头："编号  名字  描述"）
+    // 鍏堣涓€琛屽簾寮冩帀锛堝洜涓虹涓€琛屾槸涓枃琛ㄥご锛?缂栧彿  鍚嶅瓧  鎻忚堪"锛?
     getline(file, line); 
 
     int id;
     string name, desc;
     while (file >> id >> name >> desc) {
-        // 先建立空的 edges
+        // 鍏堝缓绔嬬┖鐨?edges
         Scene s = {id, name, desc, vector<Edge>()};
         g.scenes.push_back(s);
     }
     file.close();
 
-    // 在读取完所有景点后，初始化每个景点的邻接矩阵数据结构
+    // 鍦ㄨ鍙栧畬鎵€鏈夋櫙鐐瑰悗锛屽垵濮嬪寲姣忎釜鏅偣鐨勯偦鎺ョ煩闃垫暟鎹粨鏋?
     int n = g.scenes.size();
     for (int i = 0; i < n; ++i) {
-        g.scenes[i].edges.resize(n); // 大小与景点数量相同
+        g.scenes[i].edges.resize(n); // 澶у皬涓庢櫙鐐规暟閲忕浉鍚?
         for (int j = 0; j < n; ++j) {
-            // 用每个位置对应的景点 ID 填充 to 字段，权重初始化为 INT_MAX
+            // 鐢ㄦ瘡涓綅缃搴旂殑鏅偣 ID 濉厖 to 瀛楁锛屾潈閲嶅垵濮嬪寲涓?INT_MAX
             g.scenes[i].edges[j] = {g.scenes[j].id, INT_MAX, -1};
         }
-        // 自己到自己的距离为 0
+        // 鑷繁鍒拌嚜宸辩殑璺濈涓?0
         g.scenes[i].edges[i].weight = 0;
     }
     return true;
 }
 
-// 2. 从文件读取道路数据
+// 2. 浠庢枃浠惰鍙栭亾璺暟鎹?
 bool loadRoads(Graph& g, const string& filename) {
     ifstream file(filename);
     if (!file.is_open()) return false;
 
     string line;
-    // 先读一行废弃掉表头（"起点  终点  距离  类型"）
+    // 鍏堣涓€琛屽簾寮冩帀琛ㄥご锛?璧风偣  缁堢偣  璺濈  绫诲瀷"锛?
     getline(file, line); 
 
     int from, to, weight, type;
     while (file >> from >> to >> weight >> type) {
-        // 因为是邻接矩阵，我们需要通过 ID 找到对应的索引
+        // 鍥犱负鏄偦鎺ョ煩闃碉紝鎴戜滑闇€瑕侀€氳繃 ID 鎵惧埌瀵瑰簲鐨勭储寮?
         int fromIndex = -1, toIndex = -1;
         for (int i = 0; i < g.scenes.size(); ++i) {
             if (g.scenes[i].id == from) fromIndex = i;
             if (g.scenes[i].id == to) toIndex = i;
         }
 
-        // 双向赋值（覆盖原本的 INT_MAX）
+        // 鍙屽悜璧嬪€硷紙瑕嗙洊鍘熸湰鐨?INT_MAX锛?
         if (fromIndex != -1 && toIndex != -1) {
             g.scenes[fromIndex].edges[toIndex].weight = weight;
             g.scenes[fromIndex].edges[toIndex].roadType = type;
@@ -68,12 +68,12 @@ bool loadRoads(Graph& g, const string& filename) {
     return true;
 }
 
-// 3. 将内存里的景点数据写回文件（持久化）
+// 3. 灏嗗唴瀛橀噷鐨勬櫙鐐规暟鎹啓鍥炴枃浠讹紙鎸佷箙鍖栵級
 bool saveScenes(const Graph& g, const string& filename) {
     ofstream file(filename);
     if (!file.is_open()) return false;
 
-    file << "编号\t名字\t描述\n"; // 写入表头
+    file << "缂栧彿\t鍚嶅瓧\t鎻忚堪\n"; // 鍐欏叆琛ㄥご
     for (const Scene& s : g.scenes) {
         file << s.id << "\t" << s.name << "\t" << s.description << "\n";
     }
@@ -81,15 +81,15 @@ bool saveScenes(const Graph& g, const string& filename) {
     return true;
 }
 
-// 4. 将内存里的道路数据写回文件（持久化）
+// 4. 灏嗗唴瀛橀噷鐨勯亾璺暟鎹啓鍥炴枃浠讹紙鎸佷箙鍖栵級
 bool saveRoads(const Graph& g, const string& filename) {
     ofstream file(filename);
     if (!file.is_open()) return false;
 
-    file << "起点\t终点\t距离\t类型\n"; // 写入表头
+    file << "璧风偣\t缁堢偣\t璺濈\t绫诲瀷\n"; // 鍐欏叆琛ㄥご
     for (int i = 0; i < g.scenes.size(); ++i) {
         for (int j = i + 1; j < g.scenes.size(); ++j) {
-            // 只要不是无穷大，且不是自身，说明有一条路
+            // 鍙涓嶆槸鏃犵┓澶э紝涓斾笉鏄嚜韬紝璇存槑鏈変竴鏉¤矾
             if (g.scenes[i].edges[j].weight != INT_MAX) {
                 file << g.scenes[i].id << "\t" 
                      << g.scenes[j].id << "\t" 
@@ -102,19 +102,19 @@ bool saveRoads(const Graph& g, const string& filename) {
     return true;
 }
 
-// 提取出行走专用的邻接矩阵图，供算法使用
+// 鎻愬彇鍑鸿璧颁笓鐢ㄧ殑閭绘帴鐭╅樀鍥撅紝渚涚畻娉曚娇鐢?
 Graph getWalkGraph(const Graph& g) {
     Graph res = g;
-    // 构建邻接矩阵形式的 edges 配合 Dijkstra 的索引访问
+    // 鏋勫缓閭绘帴鐭╅樀褰㈠紡鐨?edges 閰嶅悎 Dijkstra 鐨勭储寮曡闂?
     for (int i = 0; i < res.scenes.size(); ++i) {
         vector<Edge> matrixEdges(res.scenes.size());
         for (int j = 0; j < res.scenes.size(); ++j) {
             matrixEdges[j] = {res.scenes[j].id, INT_MAX, 0}; 
         }
-        matrixEdges[i].weight = 0; // 自身到自身距离为 0
+        matrixEdges[i].weight = 0; // 鑷韩鍒拌嚜韬窛绂讳负 0
         
         for (const Edge& e : g.scenes[i].edges) {
-            if (e.roadType == 0) { // 仅提取人行道
+            if (e.roadType == 0) { // 浠呮彁鍙栦汉琛岄亾
                 int targetIndex = -1;
                 for (int k = 0; k < res.scenes.size(); ++k) {
                     if (res.scenes[k].id == e.to) {
@@ -132,7 +132,7 @@ Graph getWalkGraph(const Graph& g) {
     return res;
 }
 
-// 提取出车行专用的邻接矩阵图，供算法使用
+// 鎻愬彇鍑鸿溅琛屼笓鐢ㄧ殑閭绘帴鐭╅樀鍥撅紝渚涚畻娉曚娇鐢?
 Graph getDriveGraph(const Graph& g) {
     Graph res = g;
     for (int i = 0; i < res.scenes.size(); ++i) {
@@ -142,8 +142,8 @@ Graph getDriveGraph(const Graph& g) {
         }
         matrixEdges[i].weight = 0; 
         
-        for (const Edge& e : g.scenes[i].edges) {//来个类python的for循环，遍历每条边
-            if (e.roadType == 1) { // 仅提取车道
+        for (const Edge& e : g.scenes[i].edges) {//鏉ヤ釜绫籶ython鐨刦or寰幆锛岄亶鍘嗘瘡鏉¤竟
+            if (e.roadType == 1) { // 浠呮彁鍙栬溅閬?
                 int targetIndex = -1;
                 for (int k = 0; k < res.scenes.size(); ++k) {
                     if (res.scenes[k].id == e.to) {

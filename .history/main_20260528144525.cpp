@@ -1,25 +1,25 @@
-#include <iostream>
+﻿#include <iostream>
 #include "algorithm/Graph.h"
 
 using namespace std;
 
 int main() {
-    // 1. 声明一个包含了景点和边的图变量
+    // 1. 澹版槑涓€涓寘鍚簡鏅偣鍜岃竟鐨勫浘鍙橀噺
     Graph myGraph; 
 
-    // 2. 调用函数把数据读进去 (把 myGraph 作为参数传进去填满)
+    // 2. 璋冪敤鍑芥暟鎶婃暟鎹杩涘幓 (鎶?myGraph 浣滀负鍙傛暟浼犺繘鍘诲～婊?
     loadScenes(myGraph, "data/scene.txt");
     loadRoads(myGraph, "data/road.txt");
 
-    // 3. 测试增删改查
-    addScene(myGraph, 6, "宿舍楼", "睡觉的地方");
+    // 3. 娴嬭瘯澧炲垹鏀规煡
+    addScene(myGraph, 6, "瀹胯垗妤?, "鐫¤鐨勫湴鏂?);
     
-    // 4. 将总表解耦成人行道和车道
+    // 4. 灏嗘€昏〃瑙ｈ€︽垚浜鸿閬撳拰杞﹂亾
     Graph walkGraph = getWalkGraph(myGraph);
     Graph driveGraph = getDriveGraph(myGraph);
 
-    // 5. 测试算法（传入解耦好的专用图，确保以原本的 Dijkstra 算法代码为中心，不需要修改它）
-    // 假设 userType=0 代表步行，userType=1 代表车行（最后那个 0/1 参数原本没用到，所以我们通过传入不同的专用图来实现解耦）
+    // 5. 娴嬭瘯绠楁硶锛堜紶鍏ヨВ鑰﹀ソ鐨勪笓鐢ㄥ浘锛岀‘淇濅互鍘熸湰鐨?Dijkstra 绠楁硶浠ｇ爜涓轰腑蹇冿紝涓嶉渶瑕佷慨鏀瑰畠锛?
+    // 鍋囪 userType=0 浠ｈ〃姝ヨ锛寀serType=1 浠ｈ〃杞﹁锛堟渶鍚庨偅涓?0/1 鍙傛暟鍘熸湰娌＄敤鍒帮紝鎵€浠ユ垜浠€氳繃浼犲叆涓嶅悓鐨勪笓鐢ㄥ浘鏉ュ疄鐜拌В鑰︼級
     vector<int> pathWalk = getShortestPath(walkGraph, 1, 4, 0);
     vector<int> pathDrive = getShortestPath(driveGraph, 1, 4, 1);
     for(int i=0;i<pathWalk.size();i++)

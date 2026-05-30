@@ -1,43 +1,43 @@
-#include "Graph.h"
+﻿#include "Graph.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
 
 using namespace std;
 
-// 1. 从文件读取景点数据
+// 1. 浠庢枃浠惰鍙栨櫙鐐规暟鎹?
 bool loadScenes(Graph& g, const string& filename) {
     ifstream file(filename);
     if (!file.is_open()) return false;
 
     string line;
-    // 先读一行废弃掉（因为第一行是中文表头："编号  名字  描述"）
+    // 鍏堣涓€琛屽簾寮冩帀锛堝洜涓虹涓€琛屾槸涓枃琛ㄥご锛?缂栧彿  鍚嶅瓧  鎻忚堪"锛?
     getline(file, line); 
 
     int id;
     string name, desc;
-    // 使用 >> 能够自动跳过文件里的所有的空格和Tab
+    // 浣跨敤 >> 鑳藉鑷姩璺宠繃鏂囦欢閲岀殑鎵€鏈夌殑绌烘牸鍜孴ab
     while (file >> id >> name >> desc) {
-        // 初始化时包含空 vector<Edge>()
+        // 鍒濆鍖栨椂鍖呭惈绌?vector<Edge>()
         Scene s = {id, name, desc, vector<Edge>()};
-        g.scenes.push_back(s);  // 直接放入数组
+        g.scenes.push_back(s);  // 鐩存帴鏀惧叆鏁扮粍
     }
     file.close();
     return true;
 }
 
-// 2. 从文件读取道路数据
+// 2. 浠庢枃浠惰鍙栭亾璺暟鎹?
 bool loadRoads(Graph& g, const string& filename) {
     ifstream file(filename);
     if (!file.is_open()) return false;
 
     string line;
-    // 先读一行废弃掉表头（"起点  终点  距离  类型"）
+    // 鍏堣涓€琛屽簾寮冩帀琛ㄥご锛?璧风偣  缁堢偣  璺濈  绫诲瀷"锛?
     getline(file, line); 
 
     int from, to, weight, type;
     while (file >> from >> to >> weight >> type) {
-        // 双向道路，两边都要加
+        // 鍙屽悜閬撹矾锛屼袱杈归兘瑕佸姞
         for (Scene& s : g.scenes) {
             if (s.id == from) s.edges.push_back({to, weight, type});
             if (s.id == to) s.edges.push_back({from, weight, type});
@@ -47,12 +47,12 @@ bool loadRoads(Graph& g, const string& filename) {
     return true;
 }
 
-// 3. 将内存里的景点数据写回文件（持久化）
+// 3. 灏嗗唴瀛橀噷鐨勬櫙鐐规暟鎹啓鍥炴枃浠讹紙鎸佷箙鍖栵級
 bool saveScenes(const Graph& g, const string& filename) {
     ofstream file(filename);
     if (!file.is_open()) return false;
 
-    file << "编号\t名字\t描述\n"; // 写入表头
+    file << "缂栧彿\t鍚嶅瓧\t鎻忚堪\n"; // 鍐欏叆琛ㄥご
     for (const Scene& s : g.scenes) {
         file << s.id << "\t" << s.name << "\t" << s.description << "\n";
     }
@@ -60,16 +60,16 @@ bool saveScenes(const Graph& g, const string& filename) {
     return true;
 }
 
-// 4. 将内存里的道路数据写回文件（持久化）
+// 4. 灏嗗唴瀛橀噷鐨勯亾璺暟鎹啓鍥炴枃浠讹紙鎸佷箙鍖栵級
 bool saveRoads(const Graph& g, const string& filename) {
     ofstream file(filename);
     if (!file.is_open()) return false;
 
-    file << "起点\t终点\t距离\t类型\n"; // 写入表头
+    file << "璧风偣\t缁堢偣\t璺濈\t绫诲瀷\n"; // 鍐欏叆琛ㄥご
     for (const Scene& s : g.scenes) {
         int from = s.id;
         for (const Edge& e : s.edges) {
-            if (from < e.to) { // 解决无向图重复写入的问题
+            if (from < e.to) { // 瑙ｅ喅鏃犲悜鍥鹃噸澶嶅啓鍏ョ殑闂
                 file << from << "\t" << e.to << "\t" << e.weight << "\t" << e.roadType << "\n";
             }
         }
@@ -78,33 +78,33 @@ bool saveRoads(const Graph& g, const string& filename) {
     return true;
 }
 
-// ================== C U R D (增删改查) 业务代码 ==================
+// ================== C U R D (澧炲垹鏀规煡) 涓氬姟浠ｇ爜 ==================
 
-// 增加景点
+// 澧炲姞鏅偣
 bool addScene(Graph& g, int id, string name, string desc) {
-    // 检查是否已经存在
+    // 妫€鏌ユ槸鍚﹀凡缁忓瓨鍦?
     for (const Scene& s : g.scenes) {
         if (s.id == id) return false;
     }
     
     g.scenes.push_back({id, name, desc, vector<Edge>()});
-    // 强制保存到文件
+    // 寮哄埗淇濆瓨鍒版枃浠?
     saveScenes(g, "data/scene.txt");
     return true;
 }
 
-// 删除景点
+// 鍒犻櫎鏅偣
 bool deleteScene(Graph& g, int id) {
     bool found = false;
 
     auto it = g.scenes.begin();
     while (it != g.scenes.end()) {
         if (it->id == id) {
-            // 找到景点本身，彻底删除
+            // 鎵惧埌鏅偣鏈韩锛屽交搴曞垹闄?
             it = g.scenes.erase(it);
             found = true;
         } else {
-            // 删除其他景点通向该id的边
+            // 鍒犻櫎鍏朵粬鏅偣閫氬悜璇d鐨勮竟
             auto& edges = it->edges;
             auto edgeIt = edges.begin();
             while (edgeIt != edges.end()) {
@@ -120,13 +120,13 @@ bool deleteScene(Graph& g, int id) {
 
     if (!found) return false;
 
-    // 更新文件
+    // 鏇存柊鏂囦欢
     saveScenes(g, "data/scene.txt");
     saveRoads(g, "data/road.txt");
     return true;
 }
 
-// 修改景点
+// 淇敼鏅偣
 bool updateScene(Graph& g, int id, string name, string desc) {
     for (Scene& s : g.scenes) {
         if (s.id == id) {
@@ -139,14 +139,14 @@ bool updateScene(Graph& g, int id, string name, string desc) {
     return false;
 }
 
-// 增加连接边（道路）
+// 澧炲姞杩炴帴杈癸紙閬撹矾锛?
 bool addRoad(Graph& g, int from, int to, int weight, int type) {
     bool fromFound = false, toFound = false;
     for (const Scene& s : g.scenes) {
         if (s.id == from) fromFound = true;
         if (s.id == to) toFound = true;
     }
-    // 检查起点和终点是否存在
+    // 妫€鏌ヨ捣鐐瑰拰缁堢偣鏄惁瀛樺湪
     if (!fromFound || !toFound) return false;
 
     for (Scene& s : g.scenes) {
@@ -166,7 +166,7 @@ bool addRoad(Graph& g, int from, int to, int weight, int type) {
     return true;
 }
 
-// 删除连接边（道路）
+// 鍒犻櫎杩炴帴杈癸紙閬撹矾锛?
 bool deleteRoad(Graph& g, int from, int to) {
     bool found = false;
     
@@ -198,7 +198,7 @@ bool deleteRoad(Graph& g, int from, int to) {
     return found;
 }
 
-// 修改边（重新设置权重/类型）
+// 淇敼杈癸紙閲嶆柊璁剧疆鏉冮噸/绫诲瀷锛?
 bool updateRoad(Graph& g, int from, int to, int weight, int type) {
     bool found = false;
     
@@ -216,19 +216,19 @@ bool updateRoad(Graph& g, int from, int to, int weight, int type) {
     return found;
 }
 
-// 提取出行走专用的邻接矩阵图，供算法使用
+// 鎻愬彇鍑鸿璧颁笓鐢ㄧ殑閭绘帴鐭╅樀鍥撅紝渚涚畻娉曚娇鐢?
 Graph getWalkGraph(const Graph& g) {
     Graph res = g;
-    // 构建邻接矩阵形式的 edges 配合 Dijkstra 的索引访问
+    // 鏋勫缓閭绘帴鐭╅樀褰㈠紡鐨?edges 閰嶅悎 Dijkstra 鐨勭储寮曡闂?
     for (int i = 0; i < res.scenes.size(); ++i) {
         vector<Edge> matrixEdges(res.scenes.size());
         for (int j = 0; j < res.scenes.size(); ++j) {
             matrixEdges[j] = {res.scenes[j].id, INT_MAX, 0}; 
         }
-        matrixEdges[i].weight = 0; // 自身到自身距离为 0
+        matrixEdges[i].weight = 0; // 鑷韩鍒拌嚜韬窛绂讳负 0
         
         for (const Edge& e : g.scenes[i].edges) {
-            if (e.roadType == 0) { // 仅提取人行道
+            if (e.roadType == 0) { // 浠呮彁鍙栦汉琛岄亾
                 int targetIndex = -1;
                 for (int k = 0; k < res.scenes.size(); ++k) {
                     if (res.scenes[k].id == e.to) {
@@ -246,7 +246,7 @@ Graph getWalkGraph(const Graph& g) {
     return res;
 }
 
-// 提取出车行专用的邻接矩阵图，供算法使用
+// 鎻愬彇鍑鸿溅琛屼笓鐢ㄧ殑閭绘帴鐭╅樀鍥撅紝渚涚畻娉曚娇鐢?
 Graph getDriveGraph(const Graph& g) {
     Graph res = g;
     for (int i = 0; i < res.scenes.size(); ++i) {
@@ -257,7 +257,7 @@ Graph getDriveGraph(const Graph& g) {
         matrixEdges[i].weight = 0; 
         
         for (const Edge& e : g.scenes[i].edges) {
-            if (e.roadType == 1) { // 仅提取车道
+            if (e.roadType == 1) { // 浠呮彁鍙栬溅閬?
                 int targetIndex = -1;
                 for (int k = 0; k < res.scenes.size(); ++k) {
                     if (res.scenes[k].id == e.to) {

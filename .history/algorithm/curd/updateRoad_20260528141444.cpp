@@ -1,4 +1,4 @@
-#include "../Graph.h"
+﻿#include "../Graph.h"
 
 using namespace std;
 
@@ -10,7 +10,7 @@ bool updateRoad(Graph& g, int from, int to, int weight, int type) {
                 if (e.to == to) { e.weight = weight; e.roadType = type; found = true; }
             }
         }
-        // 由于是双向图，也要修改反向边
+        // 鐢变簬鏄弻鍚戝浘锛屼篃瑕佷慨鏀瑰弽鍚戣竟
         if (s.id == to) {
             for (Edge& e : s.edges) {
                 if (e.to == from) { e.weight = weight; e.roadType = type; found = true; }

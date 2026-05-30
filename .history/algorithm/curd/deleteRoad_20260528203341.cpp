@@ -1,4 +1,4 @@
-#include "../Graph.h"
+﻿#include "../Graph.h"
 
 using namespace std;
 
@@ -10,7 +10,7 @@ bool deleteRoad(Graph& g, int from, int to) {
     }
     if (fromIndex == -1 || toIndex == -1) return false;
 
-    // 修改为邻接矩阵的删除（即距离变为 INT_MAX）
+    // 淇敼涓洪偦鎺ョ煩闃电殑鍒犻櫎锛堝嵆璺濈鍙樹负 INT_MAX锛?
     if (g.scenes[fromIndex].edges[toIndex].weight != INT_MAX) {
         g.scenes[fromIndex].edges[toIndex] = {to, INT_MAX, -1};
         g.scenes[toIndex].edges[fromIndex] = {from, INT_MAX, -1};

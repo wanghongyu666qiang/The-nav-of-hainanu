@@ -1,4 +1,4 @@
-#include "../Graph.h"
+﻿#include "../Graph.h"
 #include <algorithm>
 
 using namespace std;
@@ -11,7 +11,7 @@ bool addRoad(Graph& g, int from, int to, int weight, int type) {
     }
     if (!fromFound || !toFound) return false;
 
-    // 添加双向边（加上避免重复的判断）
+    // 娣诲姞鍙屽悜杈癸紙鍔犱笂閬垮厤閲嶅鐨勫垽鏂級
     for (Scene& s : g.scenes) {
         if (s.id == from) {
             auto it = find_if(s.edges.begin(), s.edges.end(), [to](const Edge& e){ return e.to == to; });

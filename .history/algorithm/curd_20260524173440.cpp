@@ -1,10 +1,10 @@
-#include "Graph.h"
+﻿#include "Graph.h"
 #include <fstream>
 #include <iostream>
 
 using namespace std;
 
-// 这里只写 CampusGraph 类里跟写文件和改数据有的函数
+// 杩欓噷鍙啓 CampusGraph 绫婚噷璺熷啓鏂囦欢鍜屾敼鏁版嵁鏈夌殑鍑芥暟
 
 bool CampusGraph::saveScenesToFile(const std::string& filename) {
     ofstream file(filename); 
@@ -19,8 +19,8 @@ bool CampusGraph::saveScenesToFile(const std::string& filename) {
 }
 
 bool CampusGraph::deleteScene(int id) {
-    // 你的删除结点逻辑，记得在开头加上  bool CampusGraph:: 前缀
+    // 浣犵殑鍒犻櫎缁撶偣閫昏緫锛岃寰楀湪寮€澶村姞涓? bool CampusGraph:: 鍓嶇紑
     // ......
 }
 
-// ... 接着写 updateScene, addRoad 等等
+// ... 鎺ョ潃鍐?updateScene, addRoad 绛夌瓑

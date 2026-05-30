@@ -1,4 +1,4 @@
-#include "../Graph.h"
+﻿#include "../Graph.h"
 #include <algorithm>
 
 using namespace std;
@@ -13,10 +13,10 @@ bool deleteScene(Graph& g, int id) {
     }
     if (index == -1) return false;
 
-    // 1. 删除该景点结点
+    // 1. 鍒犻櫎璇ユ櫙鐐圭粨鐐?
     g.scenes.erase(g.scenes.begin() + index);
 
-    // 2. 对于剩余的景点，删除对应维度邻接矩阵的列（缩减那个元素）
+    // 2. 瀵逛簬鍓╀綑鐨勬櫙鐐癸紝鍒犻櫎瀵瑰簲缁村害閭绘帴鐭╅樀鐨勫垪锛堢缉鍑忛偅涓厓绱狅級
     for (Scene& s : g.scenes) {
         s.edges.erase(s.edges.begin() + index);
     }

@@ -1,42 +1,42 @@
-#include "Graph.h"
+﻿#include "Graph.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
 
 using namespace std;
 
-// 1. 从文件读取景点数据
+// 1. 浠庢枃浠惰鍙栨櫙鐐规暟鎹?
 bool loadScenes(Graph& g, const string& filename) {
     ifstream file(filename);
     if (!file.is_open()) return false;
 
     string line;
-    // 先读一行废弃掉（因为第一行是中文表头："编号  名字  描述"）
+    // 鍏堣涓€琛屽簾寮冩帀锛堝洜涓虹涓€琛屾槸涓枃琛ㄥご锛?缂栧彿  鍚嶅瓧  鎻忚堪"锛?
     getline(file, line); 
 
     int id;
     string name, desc;
-    // 使用 >> 能够自动跳过文件里的所有的空格和Tab
+    // 浣跨敤 >> 鑳藉鑷姩璺宠繃鏂囦欢閲岀殑鎵€鏈夌殑绌烘牸鍜孴ab
     while (file >> id >> name >> desc) {
         Scene s = {id, name, desc};
-        g.scenes[id] = s;  // 把读到的数据放进传进来的 g 里面
+        g.scenes[id] = s;  // 鎶婅鍒扮殑鏁版嵁鏀捐繘浼犺繘鏉ョ殑 g 閲岄潰
     }
     file.close();
     return true;
 }
 
-// 2. 从文件读取道路数据
+// 2. 浠庢枃浠惰鍙栭亾璺暟鎹?
 bool loadRoads(Graph& g, const string& filename) {
     ifstream file(filename);
     if (!file.is_open()) return false;
 
     string line;
-    // 先读一行废弃掉表头（"起点  终点  距离  类型"）
+    // 鍏堣涓€琛屽簾寮冩帀琛ㄥご锛?璧风偣  缁堢偣  璺濈  绫诲瀷"锛?
     getline(file, line); 
 
     int from, to, weight, type;
     while (file >> from >> to >> weight >> type) {
-        // 双向道路，两边都要加
+        // 鍙屽悜閬撹矾锛屼袱杈归兘瑕佸姞
         g.adjList[from].push_back({to, weight, type});
         g.adjList[to].push_back({from, weight, type});
     }
@@ -44,12 +44,12 @@ bool loadRoads(Graph& g, const string& filename) {
     return true;
 }
 
-// 3. 将内存里的景点数据写回文件（持久化）
+// 3. 灏嗗唴瀛橀噷鐨勬櫙鐐规暟鎹啓鍥炴枃浠讹紙鎸佷箙鍖栵級
 bool saveScenes(const Graph& g, const string& filename) {
     ofstream file(filename);
     if (!file.is_open()) return false;
 
-    file << "编号\t名字\t描述\n"; // 写入表头
+    file << "缂栧彿\t鍚嶅瓧\t鎻忚堪\n"; // 鍐欏叆琛ㄥご
     for (const auto& pair : g.scenes) {
         const Scene& s = pair.second;
         file << s.id << "\t" << s.name << "\t" << s.description << "\n";
@@ -58,17 +58,17 @@ bool saveScenes(const Graph& g, const string& filename) {
     return true;
 }
 
-// 4. 将内存里的道路数据写回文件（持久化）
+// 4. 灏嗗唴瀛橀噷鐨勯亾璺暟鎹啓鍥炴枃浠讹紙鎸佷箙鍖栵級
 bool saveRoads(const Graph& g, const string& filename) {
     ofstream file(filename);
     if (!file.is_open()) return false;
 
-    file << "起点\t终点\t距离\t类型\n"; // 写入表头
-    // 为了防止双向边写入两次，可以用二维map或只在 from < to 时写入
+    file << "璧风偣\t缁堢偣\t璺濈\t绫诲瀷\n"; // 鍐欏叆琛ㄥご
+    // 涓轰簡闃叉鍙屽悜杈瑰啓鍏ヤ袱娆★紝鍙互鐢ㄤ簩缁磎ap鎴栧彧鍦?from < to 鏃跺啓鍏?
     for (const auto& pair : g.adjList) {
         int from = pair.first;
         for (const Edge& e : pair.second) {
-            if (from < e.to) { // 解决无向图重复写入的问题
+            if (from < e.to) { // 瑙ｅ喅鏃犲悜鍥鹃噸澶嶅啓鍏ョ殑闂
                 file << from << "\t" << e.to << "\t" << e.weight << "\t" << e.roadType << "\n";
             }
         }
@@ -77,30 +77,30 @@ bool saveRoads(const Graph& g, const string& filename) {
     return true;
 }
 
-// ================== C U R D (增删改查) 业务代码 ==================
+// ================== C U R D (澧炲垹鏀规煡) 涓氬姟浠ｇ爜 ==================
 
-// 增加景点
+// 澧炲姞鏅偣
 bool addScene(Graph& g, int id, string name, string desc) {
-    // 检查是否已经存在
+    // 妫€鏌ユ槸鍚﹀凡缁忓瓨鍦?
     if (g.scenes.find(id) != g.scenes.end()) return false; 
     
     g.scenes[id] = {id, name, desc};
-    // 强制保存到文件
+    // 寮哄埗淇濆瓨鍒版枃浠?
     saveScenes(g, "data/scene.txt");
     return true;
 }
 
-// 删除景点
+// 鍒犻櫎鏅偣
 bool deleteScene(Graph& g, int id) {
     if (g.scenes.find(id) == g.scenes.end()) return false;
 
-    // 1. 删除景点信息
+    // 1. 鍒犻櫎鏅偣淇℃伅
     g.scenes.erase(id);
 
-    // 2. 删除与该景点直接相关的邻接链表
+    // 2. 鍒犻櫎涓庤鏅偣鐩存帴鐩稿叧鐨勯偦鎺ラ摼琛?
     g.adjList.erase(id);
 
-    // 3. 遍历其他所有景点的链表，删除通向这个 id 的边
+    // 3. 閬嶅巻鍏朵粬鎵€鏈夋櫙鐐圭殑閾捐〃锛屽垹闄ら€氬悜杩欎釜 id 鐨勮竟
     for (auto& pair : g.adjList) {
         vector<Edge>& edges = pair.second;
         for (auto it = edges.begin(); it != edges.end(); ) {
@@ -112,13 +112,13 @@ bool deleteScene(Graph& g, int id) {
         }
     }
 
-    // 更新文件
+    // 鏇存柊鏂囦欢
     saveScenes(g, "data/scene.txt");
     saveRoads(g, "data/road.txt");
     return true;
 }
 
-// 修改景点
+// 淇敼鏅偣
 bool updateScene(Graph& g, int id, string name, string desc) {
     if (g.scenes.find(id) == g.scenes.end()) return false;
     
@@ -129,30 +129,30 @@ bool updateScene(Graph& g, int id, string name, string desc) {
     return true;
 }
 
-// 增加连接边（道路）
+// 澧炲姞杩炴帴杈癸紙閬撹矾锛?
 bool addRoad(Graph& g, int from, int to, int weight, int type) {
-    // 检查起点和终点是否存在
+    // 妫€鏌ヨ捣鐐瑰拰缁堢偣鏄惁瀛樺湪
     if (g.scenes.find(from) == g.scenes.end() || g.scenes.find(to) == g.scenes.end()) {
         return false;
     }
 
-    // 检查是否已经有这条边（防止重复添加）
+    // 妫€鏌ユ槸鍚﹀凡缁忔湁杩欐潯杈癸紙闃叉閲嶅娣诲姞锛?
     for (const Edge& e : g.adjList[from]) {
         if (e.to == to) return false;
     }
 
     g.adjList[from].push_back({to, weight, type});
-    g.adjList[to].push_back({from, weight, type}); // 无向图
+    g.adjList[to].push_back({from, weight, type}); // 鏃犲悜鍥?
     
     saveRoads(g, "data/road.txt");
     return true;
 }
 
-// 删除连接边（道路）
+// 鍒犻櫎杩炴帴杈癸紙閬撹矾锛?
 bool deleteRoad(Graph& g, int from, int to) {
     bool found = false;
     
-    // 从 from 的链表中删除 to
+    // 浠?from 鐨勯摼琛ㄤ腑鍒犻櫎 to
     auto& fromEdges = g.adjList[from];
     for (auto it = fromEdges.begin(); it != fromEdges.end(); ) {
         if (it->to == to) {
@@ -163,7 +163,7 @@ bool deleteRoad(Graph& g, int from, int to) {
         }
     }
     
-    // 从 to 的链表中删除 from
+    // 浠?to 鐨勯摼琛ㄤ腑鍒犻櫎 from
     auto& toEdges = g.adjList[to];
     for (auto it = toEdges.begin(); it != toEdges.end(); ) {
         if (it->to == from) {
@@ -177,7 +177,7 @@ bool deleteRoad(Graph& g, int from, int to) {
     return found;
 }
 
-// 修改边（重新设置权重/类型）
+// 淇敼杈癸紙閲嶆柊璁剧疆鏉冮噸/绫诲瀷锛?
 bool updateRoad(Graph& g, int from, int to, int weight, int type) {
     bool found = false;
     

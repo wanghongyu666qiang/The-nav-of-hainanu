@@ -1,4 +1,4 @@
-#include "Graph.h"
+﻿#include "Graph.h"
 #include <queue>
 #include <iostream>
 
@@ -6,10 +6,10 @@ using namespace std;
 
 
 
-vector<int> getShortestPath(const Graph& g, int start, int end, int userType) {//采用dijistra算法
-    vector<int> path;//这里用动态数组来存储路径，最后返回给调用者
+vector<int> getShortestPath(const Graph& g, int start, int end, int userType) {//閲囩敤dijistra绠楁硶
+    vector<int> path;//杩欓噷鐢ㄥ姩鎬佹暟缁勬潵瀛樺偍璺緞锛屾渶鍚庤繑鍥炵粰璋冪敤鑰?
     
-    // 比如可以通过遍历 scenes 找到当前节点的 edges 进行 Dijkstra 操作了！
+    // 姣斿鍙互閫氳繃閬嶅巻 scenes 鎵惧埌褰撳墠鑺傜偣鐨?edges 杩涜 Dijkstra 鎿嶄綔浜嗭紒
     // for (const Scene& s : g.scenes) {
     //      if (s.id == currentNode) {
     //          for (const Edge& edge : s.edges) {
@@ -29,6 +29,6 @@ vector<int> getShortestPath(const Graph& g, int start, int end, int userType) {/
 
 vector<int> getTSPRoute(const Graph& g, int start, vector<int> targets, int userType) {
     vector<int> route;
-    // ... TSP 算法
+    // ... TSP 绠楁硶
     return route;
 }

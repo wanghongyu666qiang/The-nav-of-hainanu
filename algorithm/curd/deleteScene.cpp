@@ -4,13 +4,7 @@
 using namespace std;
 
 bool deleteScene(Graph& g, int id) {
-    int index = -1;
-    for (int i = 0; i < g.scenes.size(); ++i) {
-        if (g.scenes[i].id == id) {
-            index = i;
-            break;
-        }
-    }
+    int index = getIdIndex(g.scenes, id);
     if (index == -1) return false;
 
     // 1. 删除该景点结点

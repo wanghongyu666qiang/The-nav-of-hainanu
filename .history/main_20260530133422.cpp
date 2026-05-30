@@ -65,21 +65,15 @@ switch(choice){
         cout<<"请输入景点编号：";
         int id;
         cin>>id;
-        int index=getIdIndex(g.scenes,id);
-        if(index==-1){
-            cout<<"景点编号不存在！"<<endl;
-        }else{
-            cout<<"请输入用户类型(0步行,1车行)：";
-            int userType;
-            cin>>userType;
-            Graph graphToUse=getFilteredGraph(g,userType);
-            for(int i=0;i<graphToUse.scenes.size();i++){
-                if(i==index) continue;
-                cout<<"从"<<g.scenes[index].name<<"到"<<g.scenes[i].name<<"的最短路径："<<endl;
-                getshortestpath(graphToUse,index,i,userType);
-            }
-        }
-        break;
+        int index=getIdIndex(g.scenes,id);//得到在图中的位置
+        cout<<"请输入用户类型(0步行,1车行)：";
+        int userType;
+        cin>>userType;
+Graph graphtouse=getFilteredGraph(g,userType);
+    for(int i=0;i<graphtouse.scenes.size();i++){
+        if(i==index) continue;//不需要算自己到自己的距离
+        cout<<"从"<<g.scenes[index].name<<"到"<<g.scenes[i].name<<"的最短路径："<<endl;
+        getshortestpath(graphtouse,index,i,userType);
     }
     case 4:
     case 5:

@@ -70,3 +70,8 @@ current=path[current];//回溯到上一个节点
 
 }
 
+vector<int> getTSPRoute(const Graph& g, int start, vector<int> targets, int userType) {
+    vector<int> route;
+    // ... TSP 算法
+    return route;
+}

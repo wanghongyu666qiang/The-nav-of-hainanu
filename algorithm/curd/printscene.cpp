@@ -1,6 +1,6 @@
 #include "../Graph.h"
-using namespace std;
 #include <iostream>
+using namespace std;
 
 
 void printScenes(const Graph& g) {

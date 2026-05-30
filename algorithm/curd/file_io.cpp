@@ -1,7 +1,6 @@
 #include "../Graph.h"
 #include <iostream>
 #include <fstream>
-#include <sstream>
 
 using namespace std;
 
@@ -49,11 +48,8 @@ bool loadRoads(Graph& g, const string& filename) {
     int from, to, weight, type;
     while (file >> from >> to >> weight >> type) {
         // 因为是邻接矩阵，我们需要通过 ID 找到对应的索引
-        int fromIndex = -1, toIndex = -1;
-        for (int i = 0; i < g.scenes.size(); ++i) {
-            if (g.scenes[i].id == from) fromIndex = i;
-            if (g.scenes[i].id == to) toIndex = i;
-        }
+        int fromIndex = getIdIndex(g.scenes, from);
+        int toIndex = getIdIndex(g.scenes, to);
 
         // 双向赋值（覆盖原本的 INT_MAX）
         if (fromIndex != -1 && toIndex != -1) {
@@ -102,58 +98,22 @@ bool saveRoads(const Graph& g, const string& filename) {
     return true;
 }
 
-// 提取出行走专用的邻接矩阵图，供算法使用
-Graph getWalkGraph(const Graph& g) {
-    Graph res = g;
-    // 构建邻接矩阵形式的 edges 配合 Dijkstra 的索引访问
-    for (int i = 0; i < res.scenes.size(); ++i) {
-        vector<Edge> matrixEdges(res.scenes.size());
-        for (int j = 0; j < res.scenes.size(); ++j) {
-            matrixEdges[j] = {res.scenes[j].id, INT_MAX, 0}; 
+// 提取指定道路类型的邻接矩阵图，供算法使用
+Graph getFilteredGraph(const Graph& g, int roadType) {
+    Graph res;
+    // 只拷贝景点元数据，不拷贝 edges（避免无用深拷贝）
+    for (const Scene& s : g.scenes)
+        res.scenes.push_back({s.id, s.name, s.description, {}});
+    for (int i = 0; i < (int)res.scenes.size(); ++i) {
+        std::vector<Edge> matrixEdges(res.scenes.size());
+        for (int j = 0; j < (int)res.scenes.size(); ++j) {
+            matrixEdges[j] = {res.scenes[j].id, INT_MAX, roadType};
         }
-        matrixEdges[i].weight = 0; // 自身到自身距离为 0
-        
+        matrixEdges[i].weight = 0;
         for (const Edge& e : g.scenes[i].edges) {
-            if (e.roadType == 0) { // 仅提取人行道
-                int targetIndex = -1;
-                for (int k = 0; k < res.scenes.size(); ++k) {
-                    if (res.scenes[k].id == e.to) {
-                        targetIndex = k;
-                        break;
-                    }
-                }
-                if (targetIndex != -1) {
-                    matrixEdges[targetIndex].weight = e.weight;
-                }
-            }
-        }
-        res.scenes[i].edges = matrixEdges;
-    }
-    return res;
-}
-
-// 提取出车行专用的邻接矩阵图，供算法使用
-Graph getDriveGraph(const Graph& g) {
-    Graph res = g;
-    for (int i = 0; i < res.scenes.size(); ++i) {
-        vector<Edge> matrixEdges(res.scenes.size());
-        for (int j = 0; j < res.scenes.size(); ++j) {
-            matrixEdges[j] = {res.scenes[j].id, INT_MAX, 1}; 
-        }
-        matrixEdges[i].weight = 0; 
-        
-        for (const Edge& e : g.scenes[i].edges) {//来个类python的for循环，遍历每条边
-            if (e.roadType == 1) { // 仅提取车道
-                int targetIndex = -1;
-                for (int k = 0; k < res.scenes.size(); ++k) {
-                    if (res.scenes[k].id == e.to) {
-                        targetIndex = k;
-                        break;
-                    }
-                }
-                if (targetIndex != -1) {
-                    matrixEdges[targetIndex].weight = e.weight;
-                }
+            if (e.roadType == roadType) {
+                int ti = getIdIndex(res.scenes, e.to);
+                if (ti != -1) matrixEdges[ti].weight = e.weight;
             }
         }
         res.scenes[i].edges = matrixEdges;

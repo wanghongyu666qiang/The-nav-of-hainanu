@@ -4,7 +4,7 @@
 using namespace std;
 
 bool addScene(Graph& g, int id, string name, string desc) {
-    for (const Scene& s : g.scenes) if (s.id == id) return false;
+    if (getIdIndex(g.scenes, id) != -1) return false;
     
     // 如果是邻接矩阵，加入新景点时，要对所有的景点扩展一个维度，本景点也要创建一个那么大的维度
     int n = g.scenes.size();

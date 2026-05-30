@@ -59,28 +59,8 @@ switch(choice){
             cout<<"景点名称："<<g.scenes[index].name<<endl;
             cout<<"景点描述："<<g.scenes[index].description<<endl;
         }
-        break;
     }
-    case 3:{
-        cout<<"请输入景点编号：";
-        int id;
-        cin>>id;
-        int index=getIdIndex(g.scenes,id);
-        if(index==-1){
-            cout<<"景点编号不存在！"<<endl;
-        }else{
-            cout<<"请输入用户类型(0步行,1车行)：";
-            int userType;
-            cin>>userType;
-            Graph graphToUse=getFilteredGraph(g,userType);
-            for(int i=0;i<graphToUse.scenes.size();i++){
-                if(i==index) continue;
-                cout<<"从"<<g.scenes[index].name<<"到"<<g.scenes[i].name<<"的最短路径："<<endl;
-                getshortestpath(graphToUse,index,i,userType);
-            }
-        }
-        break;
-    }
+    case 3:
     case 4:
     case 5:
     case 6:
@@ -92,5 +72,4 @@ switch(choice){
         return 0;
 }
   }
-}
 }

@@ -53,6 +53,7 @@ Graph getFilteredGraph(const Graph& g, int roadType);
 // 算法函数 (algorithm.cpp 里)
 // 传入 const Graph& g 代表算法只读取图，不修改图
 void getshortestpath(const Graph& g, int start, int end, int userType);
+void findAllPaths(const Graph& g, int start, int end);
 
 
 #endif

@@ -70,3 +70,38 @@ current=path[current];//回溯到上一个节点
 
 }
 
+// DFS 枚举两景点间所有路径
+void dfsAllPaths(const Graph& g, int cur, int end,
+                 vector<int>& visited, vector<int>& path, int& cnt) {
+    visited[cur] = 1;
+    path.push_back(cur);
+    if (cur == end) {
+        cnt++;
+        cout << "路径" << cnt << ": ";
+        int total = 0;
+        for (int i = 0; i < (int)path.size(); i++) {
+            cout << g.scenes[path[i]].name;
+            if (i < (int)path.size() - 1) {
+                total += g.scenes[path[i]].edges[path[i + 1]].weight;
+                cout << " -> ";
+            }
+        }
+        cout << "   (距离: " << total << ")" << endl;
+    } else {
+        for (int v = 0; v < (int)g.scenes.size(); v++) {
+            if (!visited[v] && g.scenes[cur].edges[v].weight != INT_MAX)
+                dfsAllPaths(g, v, end, visited, path, cnt);
+        }
+    }
+    path.pop_back();
+    visited[cur] = 0;
+}
+
+void findAllPaths(const Graph& g, int start, int end) {
+    vector<int> visited(g.scenes.size(), 0);
+    vector<int> path;
+    int cnt = 0;
+    dfsAllPaths(g, start, end, visited, path, cnt);
+    if (cnt == 0) cout << "未找到任何路径！" << endl;
+}
+

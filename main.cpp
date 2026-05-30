@@ -15,15 +15,16 @@ int main() {
   while(true) {
         cout<<"欢迎使用海南大学导航系统！"<<endl;
         cout<<"1. 查询最短路径"<<endl;
-        cout<<"2. 查看景点信息"<<endl;
-        cout<<"3. 输入景点代码查到其它景点的最短距离"<<endl;
-        cout<<"4. 增加景点"<<endl;
-        cout<<"5. 删除景点"<<endl;
-        cout<<"6. 修改景点"<<endl;
-        cout<<"7. 增加道路"<<endl;
-        cout<<"8. 删除道路"<<endl;
-        cout<<"9. 修改道路"<<endl;
-        cout<<"10. 退出系统"<<endl;
+        cout<<"2. 查询所有路径"<<endl;
+        cout<<"3. 查看景点信息"<<endl;
+        cout<<"4. 输入景点代码查到其它景点的最短距离"<<endl;
+        cout<<"5. 增加景点"<<endl;
+        cout<<"6. 删除景点"<<endl;
+        cout<<"7. 修改景点"<<endl;
+        cout<<"8. 增加道路"<<endl;
+        cout<<"9. 删除道路"<<endl;
+        cout<<"10. 修改道路"<<endl;
+        cout<<"11. 退出系统"<<endl;
 cout<<"请输入操作编号：";
 int choice;
 cin>>choice;
@@ -47,7 +48,20 @@ switch(choice){
         }
         break;
     }
+
     case 2:{
+        printScenes(g);
+        cout<<"请输入起点和终点的编号：";
+        int sid, eid; cin>>sid>>eid;
+        int si=getIdIndex(g.scenes,sid), ei=getIdIndex(g.scenes,eid);
+        if(si==-1||ei==-1){
+            cout<<"编号不存在！"<<endl;
+        }else{
+            findAllPaths(g,si,ei);
+        }
+        break;
+    }
+    case 3:{
       cout<<"请输入景点编号：";
       int id;
       cin>>id;
@@ -61,7 +75,7 @@ switch(choice){
         }
         break;
     }
-    case 3:{
+    case 4:{
         cout<<"请输入景点编号：";
         int id;
         cin>>id;
@@ -81,7 +95,7 @@ switch(choice){
         }
         break;
     }
-    case 4:{
+    case 5:{
         cout<<"请输入新景点的编号、名称和描述：";
         int id; string name, desc;
         cin>>id>>name>>desc;
@@ -91,7 +105,7 @@ switch(choice){
             cout<<"景点添加失败！可能是编号已存在。"<<endl;
         break;
     }
-    case 5:{
+    case 6:{
         cout<<"请输入要删除的景点编号：";
         int id; cin>>id;
         if(deleteScene(g,id))
@@ -100,7 +114,7 @@ switch(choice){
             cout<<"景点删除失败！可能是编号不存在。"<<endl;
         break;
     }
-    case 6:{
+    case 7:{
         cout<<"请输入要修改的景点编号：";
         int id; cin>>id;
         int index=getIdIndex(g.scenes,id);
@@ -116,7 +130,7 @@ switch(choice){
         }
         break;
     }
-    case 7:{
+    case 8:{
         cout<<"请输入道路的起点编号、终点编号、权重和类型(0步行,1车行)：";
         int from,to,weight,type; cin>>from>>to>>weight>>type;
         if(addRoad(g,from,to,weight,type))
@@ -125,7 +139,7 @@ switch(choice){
             cout<<"道路添加失败！"<<endl;
         break;
     }
-    case 8:{
+    case 9:{
         cout<<"请输入要删除道路的起点和终点编号：";
         int from,to; cin>>from>>to;
         if(deleteRoad(g,from,to))
@@ -134,7 +148,7 @@ switch(choice){
             cout<<"道路删除失败！"<<endl;
         break;
     }
-    case 9:{
+    case 10:{
         cout<<"请输入要修改道路的起点和终点编号：";
         int from,to; cin>>from>>to;
         int fi=getIdIndex(g.scenes,from),ti=getIdIndex(g.scenes,to);
@@ -150,7 +164,7 @@ switch(choice){
         }
         break;
     }
-    case 10: {
+    case 11:{
         cout<<"感谢使用，再见！"<<endl;
         return 0;
 }

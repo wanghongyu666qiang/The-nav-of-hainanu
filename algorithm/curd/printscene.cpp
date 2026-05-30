@@ -1,11 +1,11 @@
 #include "../Graph.h"
-#include <iostream>
+#include<iostream>
 using namespace std;
 
 
-void printScenes(const Graph& g) {
-	cout << "景点列表：" << endl;
-	for (const auto& s : g.scenes) {
-		cout << s.id << "\t" << s.name << "\t" << s.description << endl;
-	}
+void printScenes(const Graph& g){
+cout<<"景点列表："<<endl;
+for(const auto& s :g.scenes){
+cout<<s.id<<"\t"<<s.name<<"\t"<<s.description<<endl;
+}
 }

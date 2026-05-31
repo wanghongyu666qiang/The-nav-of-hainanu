@@ -173,12 +173,14 @@ h2{font-size:16px;color:#1a1a2e;border-bottom:2px solid #4a6cf7;padding-bottom:8
 <div><div id="mode-walk" class="mode-btn active" onclick="setMode(0)">步行模式</div></div>
 <div><div id="mode-car" class="mode-btn" onclick="setMode(1)" style="margin-top:6px">车行模式</div></div>
 <div class="status-text" id="status"><div><span class="tag-start"></span>起点：<b id="lbl-start">未选择</b></div><div style="margin-top:4px"><span class="tag-end"></span>终点：<b id="lbl-end">未选择</b></div></div>
+<div id="spot-info" style="display:none;background:#f8f4ff;border:1px solid #d4c4f0;border-radius:8px;padding:10px;font-size:11px;color:#555;line-height:1.5"></div>
 <div><div class="btn-action btn-reset" onclick="resetAll()">重置选择</div></div>
+<div><div class="btn-action btn-allpath" onclick="runDFS()" style="background:#fff;color:#534ab7;border:1.5px solid #7f77dd;margin-bottom:8px">查询所有路径</div></div>
 <div id="result-panel"><div class="hint">点击地图上的景点选择起点和终点</div></div>
 <div style="font-size:10px;color:#bbb;text-align:center;margin-top:auto">实线=步行道 | 虚线=车行道<br>红点=起点 | 蓝点=终点</div>
 </div>
 <script>
-var spots=[{id:1,name:"第一食堂",x:120,y:100},{id:2,name:"行政楼",x:300,y:80},{id:3,name:"二号教学楼",x:480,y:80},{id:4,name:"九教",x:400,y:200},{id:5,name:"一田",x:200,y:240},{id:6,name:"书院宿舍楼",x:320,y:360},{id:7,name:"图书馆",x:530,y:230},{id:8,name:"南门",x:580,y:370},{id:9,name:"东门",x:150,y:400},{id:10,name:"游泳池",x:440,y:420}];
+var spots=[{id:1,name:"第一食堂",desc:"美味的地方",x:120,y:100},{id:2,name:"行政楼",desc:"办公的地方",x:300,y:80},{id:3,name:"二号教学楼",desc:"学习的地方",x:480,y:80},{id:4,name:"九教",desc:"计算机中心",x:400,y:200},{id:5,name:"一田",desc:"运动的地方",x:200,y:240},{id:6,name:"书院宿舍楼",desc:"睡觉的地方",x:320,y:360},{id:7,name:"图书馆",desc:"看书自习的好去处",x:530,y:230},{id:8,name:"南门",desc:"学校正大门",x:580,y:370},{id:9,name:"东门",desc:"靠近小吃街",x:150,y:400},{id:10,name:"游泳池",desc:"夏日消暑的地方",x:440,y:420}];
 var edges=[[{w:0,c:0},{w:3,c:1},{w:Infinity,c:Infinity},{w:5,c:Infinity},{w:Infinity,c:Infinity},{w:6,c:Infinity},{w:Infinity,c:Infinity},{w:Infinity,c:6},{w:3,c:Infinity},{w:Infinity,c:Infinity}],[{w:3,c:1},{w:0,c:0},{w:2,c:4},{w:Infinity,c:Infinity},{w:Infinity,c:Infinity},{w:Infinity,c:Infinity},{w:Infinity,c:2},{w:Infinity,c:10},{w:Infinity,c:Infinity},{w:Infinity,c:Infinity}],[{w:Infinity,c:Infinity},{w:2,c:4},{w:0,c:0},{w:Infinity,c:2},{w:Infinity,c:3},{w:Infinity,c:Infinity},{w:3,c:Infinity},{w:Infinity,c:Infinity},{w:Infinity,c:Infinity},{w:Infinity,c:Infinity}],[{w:5,c:Infinity},{w:Infinity,c:Infinity},{w:Infinity,c:2},{w:0,c:0},{w:6,c:Infinity},{w:Infinity,c:Infinity},{w:Infinity,c:3},{w:Infinity,c:Infinity},{w:Infinity,c:7},{w:Infinity,c:Infinity}],[{w:Infinity,c:Infinity},{w:Infinity,c:Infinity},{w:Infinity,c:3},{w:6,c:Infinity},{w:0,c:0},{w:Infinity,c:4},{w:5,c:Infinity},{w:Infinity,c:Infinity},{w:Infinity,c:Infinity},{w:3,c:Infinity}],[{w:6,c:Infinity},{w:Infinity,c:Infinity},{w:Infinity,c:Infinity},{w:Infinity,c:Infinity},{w:Infinity,c:4},{w:0,c:0},{w:Infinity,c:Infinity},{w:Infinity,c:Infinity},{w:Infinity,c:Infinity},{w:Infinity,c:5}],[{w:Infinity,c:Infinity},{w:Infinity,c:2},{w:3,c:Infinity},{w:Infinity,c:3},{w:5,c:Infinity},{w:Infinity,c:Infinity},{w:0,c:0},{w:6,c:Infinity},{w:5,c:Infinity},{w:Infinity,c:Infinity}],[{w:Infinity,c:6},{w:Infinity,c:10},{w:Infinity,c:Infinity},{w:Infinity,c:Infinity},{w:Infinity,c:Infinity},{w:Infinity,c:Infinity},{w:6,c:Infinity},{w:0,c:0},{w:7,c:Infinity},{w:Infinity,c:4}],[{w:3,c:Infinity},{w:Infinity,c:Infinity},{w:Infinity,c:Infinity},{w:Infinity,c:7},{w:Infinity,c:Infinity},{w:Infinity,c:Infinity},{w:5,c:Infinity},{w:7,c:Infinity},{w:0,c:0},{w:Infinity,c:Infinity}],[{w:Infinity,c:Infinity},{w:Infinity,c:Infinity},{w:Infinity,c:Infinity},{w:Infinity,c:Infinity},{w:3,c:Infinity},{w:Infinity,c:5},{w:Infinity,c:Infinity},{w:Infinity,c:4},{w:Infinity,c:Infinity},{w:0,c:0}]];
 var selectedStart=null,selectedEnd=null,currentMode=0;
 function selectSpot(idx){
@@ -213,6 +215,10 @@ if(i===selectedStart){c.setAttribute('fill','#e24b4b');c.setAttribute('stroke','
 else if(i===selectedEnd){c.setAttribute('fill','#4a6cf7');c.setAttribute('stroke','#185fa5');c.setAttribute('r','10');}
 else{c.setAttribute('fill','#7f77dd');c.setAttribute('stroke','#534ab7');c.setAttribute('r','7');}
 }
+var si=document.getElementById('spot-info');
+if(selectedStart!==null){
+si.style.display='block';si.innerHTML='<b>'+sp[selectedStart].name+'</b><br>'+sp[selectedStart].desc;
+}else{si.style.display='none';}
 }
 function runDijkstra(){
 var s=selectedStart,e=selectedEnd;
@@ -268,12 +274,50 @@ document.getElementById('result-panel').innerHTML=html;
 updateUI();
 updateRoadDisplay();
 }
+function runDFS(){
+var s=selectedStart,e=selectedEnd;
+if(s===null||e===null){alert('请先点击地图选择起点和终点');return;}
+var n=spots.length;
+var visited=new Array(n),path=[],allPaths=[];
+for(var i=0;i<n;i++)visited[i]=false;
+function dfs(cur,total){
+visited[cur]=true;path.push(cur);
+if(cur===e){allPaths.push({p:path.slice(),d:total});}
+else{
+for(var v=0;v<n;v++){
+if(visited[v])continue;
+var w=currentMode===0?edges[cur][v].w:edges[cur][v].c;
+if(w<Infinity)dfs(v,total+w);
+}
+}
+path.pop();visited[cur]=false;
+}
+dfs(s,0);
+allPaths.sort(function(a,b){return a.d-b.d;});
+var maxShow=20;
+var html='<div style="background:#f0f8ff;border:1px solid #b5d4f4;border-radius:8px;padding:10px;font-size:11px;line-height:1.6;max-height:200px;overflow-y:auto">';
+if(allPaths.length===0){html+='<div style="color:#e24b4b">无可达路径</div>';}
+else{
+html+='<div style="font-weight:bold;margin-bottom:4px;color:#185fa5">共'+allPaths.length+'条路径'+(allPaths.length>maxShow?('（显示前'+maxShow+'条）'):'')+'</div>';
+for(var i=0;i<allPaths.length&&i<maxShow;i++){
+html+=(i+1)+'. ';
+for(var j=0;j<allPaths[i].p.length;j++){
+html+=spots[allPaths[i].p[j]].name;
+if(j<allPaths[i].p.length-1)html+=' → ';
+}
+html+=' <span style="color:#999">('+allPaths[i].d+')</span><br>';
+}
+}
+html+='</div>';
+document.getElementById('result-panel').innerHTML+=html;
+}
 function resetAll(){
 selectedStart=null;selectedEnd=null;
 document.getElementById('lbl-start').textContent='未选择';
 document.getElementById('lbl-end').textContent='未选择';
 document.getElementById('result-panel').innerHTML='<div class="hint">点击地图上的景点选择起点和终点</div>';
 document.getElementById('path-layer').innerHTML='';
+document.getElementById('spot-info').style.display='none';
 updateUI();
 updateRoadDisplay();
 }

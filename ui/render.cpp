@@ -337,7 +337,10 @@ file<<"<div class=\"status-text\" id=\"status\">"
 <<"<div><span class=\"tag-start\"></span>起点：<b id=\"lbl-start\">未选择</b></div>"
 <<"<div style=\"margin-top:4px\"><span class=\"tag-end\"></span>终点：<b id=\"lbl-end\">未选择</b></div>"
 <<"</div>\n";
+//景点简介区(选中起点时显示)
+file<<"<div id=\"spot-info\" style=\"display:none;background:#f8f4ff;border:1px solid #d4c4f0;border-radius:8px;padding:10px;font-size:11px;color:#555;line-height:1.5\"></div>\n";
 file<<"<div><div class=\"btn-action btn-reset\" onclick=\"resetAll()\">重置选择</div></div>\n";
+file<<"<div><div class=\"btn-action btn-allpath\" onclick=\"runDFS()\" style=\"background:#fff;color:#534ab7;border:1.5px solid #7f77dd;margin-bottom:8px\">查询所有路径</div></div>\n";
 file<<"<div id=\"result-panel\"><div class=\"hint\">点击地图上的景点选择起点和终点</div></div>\n";
 file<<"<div style=\"font-size:10px;color:#bbb;text-align:center;margin-top:auto\">"
 <<"实线=步行道 | 虚线=车行道<br>红点=起点 | 蓝点=终点</div>\n";
@@ -350,7 +353,7 @@ for(int i=0;i<(int)g.scenes.size();i++){
 Pos p=getPos(g.scenes[i].id);
 if(i>0)file<<",";
 file<<"{id:"<<g.scenes[i].id<<",name:\""<<toUtf8(g.scenes[i].name)
-<<"\",x:"<<p.x<<",y:"<<p.y<<"}";
+<<"\",desc:\""<<toUtf8(g.scenes[i].description)<<"\",x:"<<p.x<<",y:"<<p.y<<"}";
 }
 file<<"];\n";
 //嵌入邻接矩阵(从两个图分别取步行和车行权重)
@@ -402,6 +405,11 @@ file<<"var selectedStart=null,selectedEnd=null,currentMode=0;\n"
 <<"else if(i===selectedEnd){c.setAttribute('fill','#4a6cf7');c.setAttribute('stroke','#185fa5');c.setAttribute('r','10');}\n"
 <<"else{c.setAttribute('fill','#7f77dd');c.setAttribute('stroke','#534ab7');c.setAttribute('r','7');}\n"
 <<"}\n"
+//显示景点简介
+<<"var si=document.getElementById('spot-info');\n"
+<<"if(selectedStart!==null){\n"
+<<"si.style.display='block';si.innerHTML='<b>'+sp[selectedStart].name+'</b><br>'+sp[selectedStart].desc;\n"
+<<"}else{si.style.display='none';}\n"
 <<"}\n"
 <<"function runDijkstra(){\n"
 <<"var s=selectedStart,e=selectedEnd;\n"
@@ -457,12 +465,53 @@ file<<"var selectedStart=null,selectedEnd=null,currentMode=0;\n"
 <<"updateUI();\n"
 <<"updateRoadDisplay();\n"
 <<"}\n"
+//DFS查找所有路径
+<<"function runDFS(){\n"
+<<"var s=selectedStart,e=selectedEnd;\n"
+<<"if(s===null||e===null){alert('请先点击地图选择起点和终点');return;}\n"
+<<"var n=spots.length;\n"
+<<"var visited=new Array(n),path=[],allPaths=[];\n"
+<<"for(var i=0;i<n;i++)visited[i]=false;\n"
+<<"function dfs(cur,total){\n"
+<<"visited[cur]=true;path.push(cur);\n"
+<<"if(cur===e){allPaths.push({p:path.slice(),d:total});}\n"
+<<"else{\n"
+<<"for(var v=0;v<n;v++){\n"
+<<"if(visited[v])continue;\n"
+<<"var w=currentMode===0?edges[cur][v].w:edges[cur][v].c;\n"
+<<"if(w<Infinity)dfs(v,total+w);\n"
+<<"}\n"
+<<"}\n"
+<<"path.pop();visited[cur]=false;\n"
+<<"}\n"
+<<"dfs(s,0);\n"
+//排序并显示
+<<"allPaths.sort(function(a,b){return a.d-b.d;});\n"
+<<"var maxShow=20;\n"
+<<"var html='<div style=\"background:#f0f8ff;border:1px solid #b5d4f4;border-radius:8px;padding:10px;font-size:11px;line-height:1.6;max-height:200px;overflow-y:auto\">';\n"
+<<"if(allPaths.length===0){html+='<div style=\"color:#e24b4b\">无可达路径</div>';}\n"
+<<"else{\n"
+<<"html+='<div style=\"font-weight:bold;margin-bottom:4px;color:#185fa5\">共'+allPaths.length+'条路径'+(allPaths.length>maxShow?('（显示前'+maxShow+'条）'):'')+'</div>';\n"
+<<"for(var i=0;i<allPaths.length&&i<maxShow;i++){\n"
+<<"html+=(i+1)+'. ';\n"
+<<"for(var j=0;j<allPaths[i].p.length;j++){\n"
+<<"html+=spots[allPaths[i].p[j]].name;\n"
+<<"if(j<allPaths[i].p.length-1)html+=' → ';\n"
+<<"}\n"
+<<"html+=' <span style=\"color:#999\">('+allPaths[i].d+')</span><br>';\n"
+<<"}\n"
+<<"}\n"
+<<"html+='</div>';\n"
+//追加到result-panel后面
+<<"document.getElementById('result-panel').innerHTML+=html;\n"
+<<"}\n"
 <<"function resetAll(){\n"
 <<"selectedStart=null;selectedEnd=null;\n"
 <<"document.getElementById('lbl-start').textContent='未选择';\n"
 <<"document.getElementById('lbl-end').textContent='未选择';\n"
 <<"document.getElementById('result-panel').innerHTML='<div class=\"hint\">点击地图上的景点选择起点和终点</div>';\n"
 <<"document.getElementById('path-layer').innerHTML='';\n"
+<<"document.getElementById('spot-info').style.display='none';\n"
 <<"updateUI();\n"
 <<"updateRoadDisplay();\n"
 <<"}\n"

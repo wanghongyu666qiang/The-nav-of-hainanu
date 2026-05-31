@@ -1,4 +1,4 @@
-#include "render.h"
+﻿#include "render.h"
 #include<fstream>
 #include<cstdlib>
 #include<climits>
@@ -92,6 +92,7 @@ int distance=res.second;
 //生成HTML
 ofstream file("ui/map.html");
 if(!file.is_open())return;
+{const char bom[]={(char)0xEF,(char)0xBB,(char)0xBF};file.write(bom,3);}//UTF-8 BOM
 file<<"<!DOCTYPE html>\n<html lang=\"zh\">\n<head>\n"
 <<"<meta charset=\"UTF-8\">\n"
 <<"<meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\">\n"
@@ -241,6 +242,7 @@ void renderInteractiveMap(const Graph& walk,const Graph& car){
 const Graph& g=walk;//别名,景点数据两份相同
 ofstream file("ui/map.html");
 if(!file.is_open())return;
+{const char bom[]={(char)0xEF,(char)0xBB,(char)0xBF};file.write(bom,3);}//UTF-8 BOM
 //=== HTML头部 ===
 file<<"<!DOCTYPE html>\n<html lang=\"zh\">\n<head>\n"
 <<"<meta charset=\"UTF-8\">\n"

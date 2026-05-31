@@ -100,31 +100,6 @@ file.close();
 return true;
 }
 
-//提取指定道路类型的邻接矩阵图，供算法使用
-Graph getFilteredGraph(const Graph& g,int roadType){
-Graph res;
-//只拷贝景点元数据，不拷贝 edges（避免无用深拷贝）
-for(int i=0;i<g.scenes.size();i++)
-res.scenes.push_back({g.scenes[i].id,g.scenes[i].name,g.scenes[i].description,{}});
-for(int i=0;i<res.scenes.size();++i){
-std::vector<Edge>matrixEdges(res.scenes.size());
-for(int j=0;j<res.scenes.size();++j){
-matrixEdges[j]={res.scenes[j].id,INT_MAX,roadType};
-}
-matrixEdges[i].weight=0;
-for(int j=0;j<g.scenes[i].edges.size();j++){
-if(g.scenes[i].edges[j].roadType==roadType){
-int ti=-1;
-for(int k=0;k<res.scenes.size();k++)
-if(res.scenes[k].id==g.scenes[i].edges[j].to){ti=k;break;}
-if(ti!=-1) matrixEdges[ti].weight=g.scenes[i].edges[j].weight;
-}
-}
-res.scenes[i].edges=matrixEdges;
-}
-return res;
-}
-
 //5. 合并保存步行图和车行图的道路到一个文件
 bool saveAllRoads(const Graph& walk,const Graph& car,const string& filename){
 ofstream file(filename);

@@ -50,9 +50,6 @@ bool deleteRoad(Graph& g,int from,int to);
 bool updateRoad(Graph& g,int from,int to,int weight,int type);
 void printScenes(const Graph& g);
 
-//工具函数：根据混合表图，生成纯供Dijkstra读取的邻接矩阵图（解耦人行道与车道）
-Graph getFilteredGraph(const Graph& g,int roadType);
-
 //算法函数 (algorithm.cpp 里)
 //传入 const Graph& g 代表算法只读取图，不修改图
 void getshortestpath(const Graph& g,int start,int end,int userType);

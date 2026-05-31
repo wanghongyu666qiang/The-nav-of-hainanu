@@ -10,6 +10,5 @@ if(fromIndex==-1||toIndex==-1) return false;
 //ĞŞ¸ÄÁÚ½Ó¾ØÕó
 g.scenes[fromIndex].edges[toIndex]={to,weight,type};
 g.scenes[toIndex].edges[fromIndex]={from,weight,type};
-saveRoads(g,"data/road.txt");
 return true;
 }

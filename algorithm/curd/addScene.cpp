@@ -24,5 +24,5 @@ newEdges[j]={g.scenes[j].id,INT_MAX,-1};
 newEdges[n]={id,0,-1};
 
 g.scenes.push_back({id,name,desc,newEdges});
-return saveScenes(g,"data/scene.txt");
+return true;
 }

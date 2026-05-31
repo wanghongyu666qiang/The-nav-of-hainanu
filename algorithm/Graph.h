@@ -36,9 +36,12 @@ return-1;
 //后勤函数（包括增删改查） (在 curd.cpp 里)
 //传入 Graph& g 代表我们要修改这幅图
 bool loadScenes(Graph& g,const std::string& filename);
-bool loadRoads(Graph& g,const std::string& filename);
+//加载道路,roadType:-1=全部,0=步行,1=车行
+bool loadRoads(Graph& g,const std::string& filename,int roadType=-1);
 bool saveScenes(const Graph& g,const std::string& filename);
 bool saveRoads(const Graph& g,const std::string& filename);
+//合并保存两个图的道路到一个文件
+bool saveAllRoads(const Graph& walk,const Graph& car,const std::string& filename);
 bool addScene(Graph& g,int id,std::string name,std::string desc);
 bool deleteScene(Graph& g,int id);
 bool updateScene(Graph& g,int id,std::string name,std::string desc);

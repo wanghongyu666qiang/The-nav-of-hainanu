@@ -81,10 +81,12 @@ return{path,dist[end]};
 }
 
 //生成地图HTML并在浏览器打开
-void renderShortestPath(const Graph& g,int startIdx,int endIdx,int userType){
-//用过滤后的图跑Dijkstra
-Graph fg=getFilteredGraph(g,userType);
-pair<vector<int>,int>res=runDijkstra(fg,startIdx,endIdx);
+void renderShortestPath(const Graph& walk,const Graph& car,int startIdx,int endIdx,int userType){
+//选对应类型的图跑Dijkstra
+const Graph& active=(userType==0)?walk:car;
+pair<vector<int>,int>res=runDijkstra(active,startIdx,endIdx);
+//walk和car共享相同的景点数据,用g做别名保持后面代码不变
+const Graph& g=walk;
 vector<int>& path=res.first;
 int distance=res.second;
 //生成HTML
@@ -112,26 +114,41 @@ file<<"<!DOCTYPE html>\n<html lang=\"zh\">\n<head>\n"
 file<<"<div id=\"map-area\">\n<svg viewBox=\"0 0 800 550\" width=\"100%\" height=\"100%\">\n";
 //地图标题
 file<<"<text x=\"400\" y=\"30\" text-anchor=\"middle\" font-size=\"16\" fill=\"#333\" font-weight=\"bold\">海南大学校园地图</text>\n";
-//1)绘制所有道路
-for(int i=0;i<(int)g.scenes.size();i++){
-for(int j=i+1;j<(int)g.scenes.size();j++){
-if(g.scenes[i].edges[j].weight==INT_MAX)continue;
-Pos pi=getPos(g.scenes[i].id);
-Pos pj=getPos(g.scenes[j].id);
-int type=g.scenes[i].edges[j].roadType;
-string color=(type==0)?"#c0c0c0":"#a0a0a0";
-string dash=(type==1)?"stroke-dasharray=\"8,4\"":"";
+//1)绘制所有道路(步行=实线灰色,车行=虚线深灰)
+file<<"<g id=\"roads-layer\">\n";
+int n=(int)walk.scenes.size();
+for(int i=0;i<n;i++){
+for(int j=i+1;j<n;j++){
+//步行道
+if(walk.scenes[i].edges[j].weight!=INT_MAX){
+Pos pi=getPos(walk.scenes[i].id);
+Pos pj=getPos(walk.scenes[j].id);
 file<<"<line x1=\""<<pi.x<<"\" y1=\""<<pi.y
 <<"\" x2=\""<<pj.x<<"\" y2=\""<<pj.y
-<<"\" stroke=\""<<color<<"\" stroke-width=\"1.5\" "<<dash<<"/>\n";
-//距离标签
-int mx=(pi.x+pj.x)/2;
-int my=(pi.y+pj.y)/2;
+<<"\" stroke=\"#c0c0c0\" stroke-width=\"1.5\"/>\n";
+int mx=(pi.x+pj.x)/2;int my=(pi.y+pj.y)/2;
 file<<"<rect x=\""<<mx-10<<"\" y=\""<<my-10<<"\" width=\"20\" height=\"16\" rx=\"4\" fill=\"white\" opacity=\"0.85\"/>\n";
 file<<"<text x=\""<<mx<<"\" y=\""<<my+2<<"\" text-anchor=\"middle\" font-size=\"9\" fill=\"#999\">"
-<<g.scenes[i].edges[j].weight<<"</text>\n";
+<<walk.scenes[i].edges[j].weight<<"</text>\n";
+}
+//车行道
+if(car.scenes[i].edges[j].weight!=INT_MAX){
+Pos pi=getPos(car.scenes[i].id);
+Pos pj=getPos(car.scenes[j].id);
+file<<"<line x1=\""<<pi.x<<"\" y1=\""<<pi.y
+<<"\" x2=\""<<pj.x<<"\" y2=\""<<pj.y
+<<"\" stroke=\"#a0a0a0\" stroke-width=\"1.5\" stroke-dasharray=\"8,4\"/>\n";
+int mx=(pi.x+pj.x)/2;int my=(pi.y+pj.y)/2;
+if(walk.scenes[i].edges[j].weight==INT_MAX){
+//只有车行道的路段才画车行标签
+file<<"<rect x=\""<<mx-10<<"\" y=\""<<my-10<<"\" width=\"20\" height=\"16\" rx=\"4\" fill=\"white\" opacity=\"0.85\"/>\n";
+file<<"<text x=\""<<mx<<"\" y=\""<<my+2<<"\" text-anchor=\"middle\" font-size=\"9\" fill=\"#999\">"
+<<car.scenes[i].edges[j].weight<<"</text>\n";
 }
 }
+}
+}
+file<<"</g>\n";
 //2)高亮最短路径
 if(distance!=INT_MAX&&path.size()>=2){
 //路径底色(更宽的光晕)
@@ -216,5 +233,239 @@ file<<"<div style=\"font-size:10px;color:#bbb;text-align:center;margin-top:auto\
 file<<"</div>\n</body>\n</html>\n";
 file.close();
 //用浏览器打开
+system("start ui\\map.html");
+}
+
+//生成交互式地图(可点击景点,JS内置Dijkstra)
+void renderInteractiveMap(const Graph& walk,const Graph& car){
+const Graph& g=walk;//别名,景点数据两份相同
+ofstream file("ui/map.html");
+if(!file.is_open())return;
+//=== HTML头部 ===
+file<<"<!DOCTYPE html>\n<html lang=\"zh\">\n<head>\n"
+<<"<meta charset=\"UTF-8\">\n"
+<<"<meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\">\n"
+<<"<title>海南大学智慧校园导航系统</title>\n"
+<<"<style>\n"
+<<"*{margin:0;padding:0;box-sizing:border-box}\n"
+<<"body{font-family:'Microsoft YaHei',sans-serif;display:flex;height:100vh;background:#f0f2f5;user-select:none}\n"
+<<"#map-area{flex:1;display:flex;align-items:center;justify-content:center;background:#fff;margin:12px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);cursor:default}\n"
+<<"#panel{width:230px;padding:20px;background:#fff;margin:12px 12px 12px 0;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);display:flex;flex-direction:column;gap:14px}\n"
+<<"h2{font-size:16px;color:#1a1a2e;border-bottom:2px solid #4a6cf7;padding-bottom:8px}\n"
+<<".mode-btn{padding:8px 0;border:2px solid #ddd;border-radius:8px;font-size:13px;cursor:pointer;text-align:center;transition:all .2s;background:#fff}\n"
+<<".mode-btn.active{border-color:#4a6cf7;background:#e6f1fb;color:#185fa5;font-weight:bold}\n"
+<<".mode-btn:hover{border-color:#4a6cf7}\n"
+<<".status-text{font-size:12px;color:#666;line-height:1.8}\n"
+<<".status-text b{color:#333}\n"
+<<".tag-start{display:inline-block;width:10px;height:10px;border-radius:50%;background:#e24b4b;margin-right:4px;vertical-align:middle}\n"
+<<".tag-end{display:inline-block;width:10px;height:10px;border-radius:50%;background:#4a6cf7;margin-right:4px;vertical-align:middle}\n"
+<<".btn-action{width:100%;padding:10px;border:none;border-radius:8px;font-size:13px;cursor:pointer}\n"
+<<".btn-run{background:#4a6cf7;color:#fff}\n"
+<<".btn-run:hover{background:#3b5de7}\n"
+<<".btn-reset{background:#f0f0f0;color:#666}\n"
+<<".btn-reset:hover{background:#e0e0e0}\n"
+<<".result-box{background:#fef5f0;border:1px solid #f0c0a0;border-radius:8px;padding:12px;font-size:12px;line-height:1.8}\n"
+<<".result-box .dist{font-size:24px;font-weight:bold;color:#d85a30}\n"
+<<".spot{cursor:pointer;transition:r .15s}\n"
+<<".spot:hover{filter:brightness(1.15)}\n"
+<<".hint{font-size:11px;color:#aaa;text-align:center}\n"
+<<"</style>\n</head>\n<body>\n";
+//=== SVG地图 ===
+file<<"<div id=\"map-area\">\n<svg id=\"map-svg\" viewBox=\"0 0 800 550\" width=\"100%\" height=\"100%\">\n";
+file<<"<text x=\"400\" y=\"28\" text-anchor=\"middle\" font-size=\"16\" fill=\"#333\" font-weight=\"bold\">海南大学校园地图 — 点击景点开始导航</text>\n";
+//道路(步行=实线,车行=虚线)
+file<<"<g id=\"roads-layer\">\n";
+int nn=(int)walk.scenes.size();
+for(int i=0;i<nn;i++){
+for(int j=i+1;j<nn;j++){
+//步行道
+if(walk.scenes[i].edges[j].weight!=INT_MAX){
+Pos pi=getPos(walk.scenes[i].id);
+Pos pj=getPos(walk.scenes[j].id);
+file<<"<line class=\"road-walk\" data-from=\""<<i<<"\" data-to=\""<<j
+<<"\" data-type=\"0\" x1=\""<<pi.x<<"\" y1=\""<<pi.y
+<<"\" x2=\""<<pj.x<<"\" y2=\""<<pj.y
+<<"\" stroke=\"#c0c0c0\" stroke-width=\"1.5\"/>\n";
+int mx=(pi.x+pj.x)/2;int my=(pi.y+pj.y)/2;
+file<<"<rect x=\""<<mx-10<<"\" y=\""<<my-10<<"\" width=\"20\" height=\"16\" rx=\"4\" fill=\"white\" opacity=\"0.85\"/>\n";
+file<<"<text x=\""<<mx<<"\" y=\""<<my+2<<"\" text-anchor=\"middle\" font-size=\"9\" fill=\"#999\">"
+<<walk.scenes[i].edges[j].weight<<"</text>\n";
+}
+//车行道
+if(car.scenes[i].edges[j].weight!=INT_MAX){
+Pos pi=getPos(car.scenes[i].id);
+Pos pj=getPos(car.scenes[j].id);
+file<<"<line class=\"road-car\" data-from=\""<<i<<"\" data-to=\""<<j
+<<"\" data-type=\"1\" x1=\""<<pi.x<<"\" y1=\""<<pi.y
+<<"\" x2=\""<<pj.x<<"\" y2=\""<<pj.y
+<<"\" stroke=\"#a0a0a0\" stroke-width=\"1.5\" stroke-dasharray=\"8,4\"/>\n";
+int mx=(pi.x+pj.x)/2;int my=(pi.y+pj.y)/2;
+if(walk.scenes[i].edges[j].weight==INT_MAX){
+file<<"<rect x=\""<<mx-10<<"\" y=\""<<my-10<<"\" width=\"20\" height=\"16\" rx=\"4\" fill=\"white\" opacity=\"0.85\"/>\n";
+file<<"<text x=\""<<mx<<"\" y=\""<<my+2<<"\" text-anchor=\"middle\" font-size=\"9\" fill=\"#999\">"
+<<car.scenes[i].edges[j].weight<<"</text>\n";
+}
+}
+}
+}
+file<<"</g>\n";
+//路径高亮层(动态绘制)
+file<<"<g id=\"path-layer\"></g>\n";
+//景点
+file<<"<g id=\"spots-layer\">\n";
+for(int i=0;i<(int)g.scenes.size();i++){
+Pos p=getPos(g.scenes[i].id);
+file<<"<g class=\"spot\" data-index=\""<<i<<"\" onclick=\"selectSpot("<<i<<")\">\n";
+file<<"<circle cx=\""<<p.x<<"\" cy=\""<<p.y+1<<"\" r=\"8\" fill=\"rgba(0,0,0,.1)\"/>\n";
+file<<"<circle cx=\""<<p.x<<"\" cy=\""<<p.y<<"\" r=\"7\" fill=\"#7f77dd\" stroke=\"#534ab7\" stroke-width=\"2\"/>\n";
+file<<"<text x=\""<<p.x<<"\" y=\""<<p.y-14<<"\" text-anchor=\"middle\" font-size=\"12\" fill=\"#333\" font-weight=\"bold\">"
+<<toUtf8(g.scenes[i].name)<<"</text>\n";
+file<<"<text x=\""<<p.x<<"\" y=\""<<p.y+4<<"\" text-anchor=\"middle\" font-size=\"9\" fill=\"white\" font-weight=\"bold\">"
+<<g.scenes[i].id<<"</text>\n";
+file<<"</g>\n";
+}
+file<<"</g>\n";
+file<<"</svg>\n</div>\n";
+//=== 右侧面板 ===
+file<<"<div id=\"panel\">\n";
+file<<"<h2>导航控制</h2>\n";
+file<<"<div><div id=\"mode-walk\" class=\"mode-btn active\" onclick=\"setMode(0)\">步行模式</div></div>\n";
+file<<"<div><div id=\"mode-car\" class=\"mode-btn\" onclick=\"setMode(1)\" style=\"margin-top:6px\">车行模式</div></div>\n";
+file<<"<div class=\"status-text\" id=\"status\">"
+<<"<div><span class=\"tag-start\"></span>起点：<b id=\"lbl-start\">未选择</b></div>"
+<<"<div style=\"margin-top:4px\"><span class=\"tag-end\"></span>终点：<b id=\"lbl-end\">未选择</b></div>"
+<<"</div>\n";
+file<<"<div><div class=\"btn-action btn-reset\" onclick=\"resetAll()\">重置选择</div></div>\n";
+file<<"<div id=\"result-panel\"><div class=\"hint\">点击地图上的景点选择起点和终点</div></div>\n";
+file<<"<div style=\"font-size:10px;color:#bbb;text-align:center;margin-top:auto\">"
+<<"实线=步行道 | 虚线=车行道<br>红点=起点 | 蓝点=终点</div>\n";
+file<<"</div>\n";
+//=== JavaScript(嵌入数据+交互逻辑) ===
+file<<"<script>\n";
+//嵌入景点数据
+file<<"var spots=[";
+for(int i=0;i<(int)g.scenes.size();i++){
+Pos p=getPos(g.scenes[i].id);
+if(i>0)file<<",";
+file<<"{id:"<<g.scenes[i].id<<",name:\""<<toUtf8(g.scenes[i].name)
+<<"\",x:"<<p.x<<",y:"<<p.y<<"}";
+}
+file<<"];\n";
+//嵌入邻接矩阵(从两个图分别取步行和车行权重)
+file<<"var edges=[";
+for(int i=0;i<nn;i++){
+if(i>0)file<<",";
+file<<"[";
+for(int j=0;j<nn;j++){
+if(j>0)file<<",";
+int ww=walk.scenes[i].edges[j].weight;
+int cw=car.scenes[i].edges[j].weight;
+file<<"{w:"<<(ww==INT_MAX?"Infinity":to_string(ww))
+<<",c:"<<(cw==INT_MAX?"Infinity":to_string(cw))<<"}";
+}
+file<<"]";
+}
+file<<"];\n";
+//交互逻辑
+file<<"var selectedStart=null,selectedEnd=null,currentMode=0;\n"
+<<"function selectSpot(idx){\n"
+<<"if(selectedStart===null){selectedStart=idx;updateUI();return;}\n"
+<<"if(selectedStart===idx){selectedStart=null;selectedEnd=null;updateUI();return;}\n"
+<<"selectedEnd=idx;updateUI();runDijkstra();\n"
+<<"}\n"
+<<"function setMode(m){\n"
+<<"currentMode=m;\n"
+<<"document.getElementById('mode-walk').className='mode-btn'+(m===0?' active':'');\n"
+<<"document.getElementById('mode-car').className='mode-btn'+(m===1?' active':'');\n"
+<<"if(selectedStart!==null&&selectedEnd!==null)runDijkstra();\n"
+<<"else updateRoadDisplay();\n"
+<<"}\n"
+<<"function updateRoadDisplay(){\n"
+<<"var lines=document.querySelectorAll('#roads-layer line');\n"
+<<"for(var i=0;i<lines.length;i++){\n"
+<<"var t=parseInt(lines[i].getAttribute('data-type'));\n"
+<<"var show=(currentMode===t);\n"
+<<"lines[i].setAttribute('opacity',show?'1':'0.15');\n"
+<<"}\n"
+<<"}\n"
+<<"function updateUI(){\n"
+<<"var sp=spots;\n"
+<<"document.getElementById('lbl-start').textContent=selectedStart!==null?sp[selectedStart].name:'未选择';\n"
+<<"document.getElementById('lbl-end').textContent=selectedEnd!==null?sp[selectedEnd].name:'未选择';\n"
+<<"//更新景点颜色\n"
+<<"var groups=document.querySelectorAll('#spots-layer .spot');\n"
+<<"for(var i=0;i<groups.length;i++){\n"
+<<"var c=groups[i].querySelectorAll('circle')[1];\n"
+<<"if(i===selectedStart){c.setAttribute('fill','#e24b4b');c.setAttribute('stroke','#a32d2d');c.setAttribute('r','10');}\n"
+<<"else if(i===selectedEnd){c.setAttribute('fill','#4a6cf7');c.setAttribute('stroke','#185fa5');c.setAttribute('r','10');}\n"
+<<"else{c.setAttribute('fill','#7f77dd');c.setAttribute('stroke','#534ab7');c.setAttribute('r','7');}\n"
+<<"}\n"
+<<"}\n"
+<<"function runDijkstra(){\n"
+<<"var s=selectedStart,e=selectedEnd;\n"
+<<"if(s===null||e===null)return;\n"
+<<"var n=spots.length;\n"
+<<"var dist=new Array(n),prev=new Array(n),visited=new Array(n);\n"
+<<"for(var i=0;i<n;i++){\n"
+<<"var w=currentMode===0?edges[s][i].w:edges[s][i].c;\n"
+<<"dist[i]=w;prev[i]=(w<Infinity)?s:-1;visited[i]=false;\n"
+<<"}\n"
+<<"visited[s]=true;dist[s]=0;prev[s]=-1;\n"
+<<"for(var i=0;i<n-1;i++){\n"
+<<"var u=-1,mini=Infinity;\n"
+<<"for(var j=0;j<n;j++){if(!visited[j]&&dist[j]<mini){mini=dist[j];u=j;}}\n"
+<<"if(u===-1)break;visited[u]=true;\n"
+<<"for(var v=0;v<n;v++){\n"
+<<"if(visited[v])continue;\n"
+<<"var ew=currentMode===0?edges[u][v].w:edges[u][v].c;\n"
+<<"if(dist[u]!==Infinity&&ew!==Infinity&&dist[u]+ew<dist[v]){\n"
+<<"dist[v]=dist[u]+ew;prev[v]=u;\n"
+<<"}\n"
+<<"}\n"
+<<"}\n"
+<<"//绘制路径\n"
+<<"var layer=document.getElementById('path-layer');\n"
+<<"layer.innerHTML='';\n"
+<<"if(dist[e]===Infinity){\n"
+<<"document.getElementById('result-panel').innerHTML='<div class=\"result-box\" style=\"background:#fcebeb;border-color:#f09595\"><div style=\"color:#e24b4b;font-weight:bold\">无可达路径</div></div>';\n"
+<<"return;\n"
+<<"}\n"
+<<"var path=[];var cur=e;\n"
+<<"while(cur!==-1){path.push(cur);cur=prev[cur];}\n"
+<<"path.reverse();\n"
+<<"//光晕\n"
+<<"var pts='';\n"
+<<"for(var i=0;i<path.length;i++){pts+=spots[path[i]].x+','+spots[path[i]].y;if(i<path.length-1)pts+=' ';}\n"
+<<"layer.innerHTML+='<polyline points=\"'+pts+'\" fill=\"none\" stroke=\"#f5c4b3\" stroke-width=\"10\" stroke-linecap=\"round\" stroke-linejoin=\"round\" opacity=\"0.5\"/>';\n"
+<<"layer.innerHTML+='<polyline points=\"'+pts+'\" fill=\"none\" stroke=\"#e24b4b\" stroke-width=\"3.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>';\n"
+<<"//方向点\n"
+<<"for(var i=0;i<path.length-1;i++){\n"
+<<"var mx=(spots[path[i]].x+spots[path[i+1]].x)/2;\n"
+<<"var my=(spots[path[i]].y+spots[path[i+1]].y)/2;\n"
+<<"layer.innerHTML+='<circle cx=\"'+mx+'\" cy=\"'+my+'\" r=\"4\" fill=\"#fff\" stroke=\"#e24b4b\" stroke-width=\"2\"/>';\n"
+<<"}\n"
+<<"//结果显示\n"
+<<"var html='<div class=\"result-box\"><div class=\"dist\">'+dist[e]+'</div><div style=\"color:#999;font-size:11px;margin-bottom:8px\">最短距离</div><div style=\"font-size:13px;line-height:1.6\">';\n"
+<<"for(var i=0;i<path.length;i++){\n"
+<<"if(i>0)html+='<span style=\"color:#d85a30;margin:0 4px\">\\u2192</span>';\n"
+<<"html+='<strong>'+spots[path[i]].name+'</strong>';\n"
+<<"}\n"
+<<"html+='</div></div>';\n"
+<<"document.getElementById('result-panel').innerHTML=html;\n"
+<<"updateUI();\n"
+<<"updateRoadDisplay();\n"
+<<"}\n"
+<<"function resetAll(){\n"
+<<"selectedStart=null;selectedEnd=null;\n"
+<<"document.getElementById('lbl-start').textContent='未选择';\n"
+<<"document.getElementById('lbl-end').textContent='未选择';\n"
+<<"document.getElementById('result-panel').innerHTML='<div class=\"hint\">点击地图上的景点选择起点和终点</div>';\n"
+<<"document.getElementById('path-layer').innerHTML='';\n"
+<<"updateUI();\n"
+<<"updateRoadDisplay();\n"
+<<"}\n"
+<<"updateRoadDisplay();\n"
+<<"</script>\n</body>\n</html>\n";
+file.close();
 system("start ui\\map.html");
 }

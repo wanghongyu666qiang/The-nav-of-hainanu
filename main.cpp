@@ -4,17 +4,28 @@
 using namespace std;
 
 int main(){
-Graph g;
-if(!loadScenes(g,"data/scene.txt")){
+Graph gWalk,gCar;
+//加载景点(两份相同)
+if(!loadScenes(gWalk,"data/scene.txt")){
 cout<<"景点数据加载失败！"<<endl;
 return 1;
 }
-if(!loadRoads(g,"data/road.txt")){
-cout<<"道路数据加载失败！"<<endl;
+if(!loadScenes(gCar,"data/scene.txt")){
+cout<<"景点数据加载失败！"<<endl;
+return 1;
+}
+//加载道路(各取所需,互不覆盖)
+if(!loadRoads(gWalk,"data/road.txt",0)){
+cout<<"步行道路加载失败！"<<endl;
+return 1;
+}
+if(!loadRoads(gCar,"data/road.txt",1)){
+cout<<"车行道路加载失败！"<<endl;
 return 1;
 }
 while(true){
 cout<<"欢迎使用海南大学导航系统！"<<endl;
+cout<<"0. 打开交互式地图"<<endl;
 cout<<"1. 查询最短路径"<<endl;
 cout<<"2. 查询所有路径"<<endl;
 cout<<"3. 查看景点信息"<<endl;
@@ -30,73 +41,68 @@ cout<<"请输入操作编号：";
 int choice;
 cin>>choice;
 switch(choice){
+case 0:{
+renderInteractiveMap(gWalk,gCar);
+cout<<"交互式地图已在浏览器中打开！"<<endl;
+break;
+}
 case 1:{
-printScenes(g);
+printScenes(gWalk);
 cout<<"请输入起点和终点的编号以及用户类型(0步行,1车行)：";
 int startId,endId,userType;
 cin>>startId>>endId>>userType;
-
-//这里将用户输入的 ID 原本转成了 index，然后在算法外部使用
-int startIndex=-1;for(int i=0;i<g.scenes.size();i++) if(g.scenes[i].id==startId){startIndex=i;break;};
-int endIndex=-1;for(int i=0;i<g.scenes.size();i++) if(g.scenes[i].id==endId){endIndex=i;break;};
-
+int startIndex=getIdIndex(gWalk.scenes,startId);
+int endIndex=getIdIndex(gWalk.scenes,endId);
 if(startIndex==-1||endIndex==-1){
 cout<<"输入的景点编号不存在！"<<endl;
-} else {
-//生成对应通行权限的图并传给原封不动的算法
-Graph graphToUse=getFilteredGraph(g,userType);
-getshortestpath(graphToUse,startIndex,endIndex,userType);
-//生成地图并用浏览器打开
-renderShortestPath(g,startIndex,endIndex,userType);
+}else{
+//直接传对应类型的图,不再需要getFilteredGraph
+const Graph& active=(userType==0)?gWalk:gCar;
+getshortestpath(active,startIndex,endIndex,userType);
+renderShortestPath(gWalk,gCar,startIndex,endIndex,userType);
 }
 break;
 }
-
 case 2:{
-printScenes(g);
+printScenes(gWalk);
 cout<<"请输入起点和终点的编号：";
 int sid,eid;cin>>sid>>eid;
-int si=-1;
-for(int i=0;i<g.scenes.size();i++) if(g.scenes[i].id==sid){si=i;break;}
-int ei=-1;
-for(int i=0;i<g.scenes.size();i++) if(g.scenes[i].id==eid){ei=i;break;}
+int si=getIdIndex(gWalk.scenes,sid);
+int ei=getIdIndex(gWalk.scenes,eid);
 if(si==-1||ei==-1){
 cout<<"编号不存在！"<<endl;
 }else{
-findAllPaths(g,si,ei);
+//DFS使用步行图(两种图路网不同,这里用步行为主)
+findAllPaths(gWalk,si,ei);
 }
 break;
 }
 case 3:{
 cout<<"请输入景点编号：";
-int id;
-cin>>id;
-int index=-1;for(int i=0;i<g.scenes.size();i++) if(g.scenes[i].id==id){index=i;break;};//得到在图中的位置
+int id;cin>>id;
+int index=getIdIndex(gWalk.scenes,id);
 if(index==-1){
 cout<<"景点编号不存在！"<<endl;
-}
-else{
-cout<<"景点名称："<<g.scenes[index].name<<endl;
-cout<<"景点描述："<<g.scenes[index].description<<endl;
+}else{
+cout<<"景点名称："<<gWalk.scenes[index].name<<endl;
+cout<<"景点描述："<<gWalk.scenes[index].description<<endl;
 }
 break;
 }
 case 4:{
 cout<<"请输入景点编号：";
-int id;
-cin>>id;
-int index=-1;for(int i=0;i<g.scenes.size();i++) if(g.scenes[i].id==id){index=i;break;};
+int id;cin>>id;
+int index=getIdIndex(gWalk.scenes,id);
 if(index==-1){
 cout<<"景点编号不存在！"<<endl;
 }else{
 cout<<"请输入用户类型(0步行,1车行)：";
-int userType;
-cin>>userType;
-Graph graphToUse=getFilteredGraph(g,userType);
-for(int i=0;i<graphToUse.scenes.size();i++){
+int userType;cin>>userType;
+const Graph& active=(userType==0)?gWalk:gCar;
+for(int i=0;i<(int)active.scenes.size();i++){
 if(i==index) continue;
-cout<<"从"<<g.scenes[index].name<<"到"<<g.scenes[i].name<<"的最短路径："<<endl;
-getshortestpath(graphToUse,index,i,userType);
+cout<<"从"<<gWalk.scenes[index].name<<"到"<<gWalk.scenes[i].name<<"的最短路径："<<endl;
+getshortestpath(active,index,i,userType);
 }
 }
 break;
@@ -105,33 +111,43 @@ case 5:{
 cout<<"请输入新景点的编号、名称和描述：";
 int id;string name,desc;
 cin>>id>>name>>desc;
-if(addScene(g,id,name,desc))
+//同时添加到两个图
+if(addScene(gWalk,id,name,desc)&&addScene(gCar,id,name,desc)){
+saveScenes(gWalk,"data/scene.txt");
 cout<<"景点添加成功！"<<endl;
-else
+}else{
 cout<<"景点添加失败！可能是编号已存在。"<<endl;
+}
 break;
 }
 case 6:{
 cout<<"请输入要删除的景点编号：";
 int id;cin>>id;
-if(deleteScene(g,id))
+//从两个图同时删除
+if(deleteScene(gWalk,id)&&deleteScene(gCar,id)){
+saveScenes(gWalk,"data/scene.txt");
+saveAllRoads(gWalk,gCar,"data/road.txt");
 cout<<"景点删除成功！"<<endl;
-else
+}else{
 cout<<"景点删除失败！可能是编号不存在。"<<endl;
+}
 break;
 }
 case 7:{
 cout<<"请输入要修改的景点编号：";
 int id;cin>>id;
-int index=-1;for(int i=0;i<g.scenes.size();i++) if(g.scenes[i].id==id){index=i;break;};
+int index=getIdIndex(gWalk.scenes,id);
 if(index==-1){
 cout<<"景点编号不存在！"<<endl;
 }else{
 cout<<"请输入新的名称和描述：";
 string name,desc;cin>>name>>desc;
-g.scenes[index].name=name;
-g.scenes[index].description=desc;
-saveScenes(g,"data/scene.txt");
+//两个图的景点数据同步修改
+gWalk.scenes[index].name=name;
+gWalk.scenes[index].description=desc;
+gCar.scenes[index].name=name;
+gCar.scenes[index].description=desc;
+saveScenes(gWalk,"data/scene.txt");
 cout<<"景点修改成功！"<<endl;
 }
 break;
@@ -139,36 +155,42 @@ break;
 case 8:{
 cout<<"请输入道路的起点编号、终点编号、权重和类型(0步行,1车行)：";
 int from,to,weight,type;cin>>from>>to>>weight>>type;
-if(addRoad(g,from,to,weight,type))
+//按类型添加到对应图
+Graph& target=(type==0)?gWalk:gCar;
+if(addRoad(target,from,to,weight,type)){
+saveAllRoads(gWalk,gCar,"data/road.txt");
 cout<<"道路添加成功！"<<endl;
-else
+}else{
 cout<<"道路添加失败！"<<endl;
+}
 break;
 }
 case 9:{
-cout<<"请输入要删除道路的起点和终点编号：";
-int from,to;cin>>from>>to;
-if(deleteRoad(g,from,to))
+cout<<"请输入要删除道路的起点终点编号及类型(0步行,1车行)：";
+int from,to,type;cin>>from>>to>>type;
+Graph& target=(type==0)?gWalk:gCar;
+if(deleteRoad(target,from,to)){
+saveAllRoads(gWalk,gCar,"data/road.txt");
 cout<<"道路删除成功！"<<endl;
-else
+}else{
 cout<<"道路删除失败！"<<endl;
+}
 break;
 }
 case 10:{
-cout<<"请输入要修改道路的起点和终点编号：";
-int from,to;cin>>from>>to;
-int fi=-1;
-for(int i=0;i<g.scenes.size();i++) if(g.scenes[i].id==from){fi=i;break;}
-int ti=-1;
-for(int i=0;i<g.scenes.size();i++) if(g.scenes[i].id==to){ti=i;break;}
+cout<<"请输入要修改道路的起点终点编号及类型(0步行,1车行)：";
+int from,to,type;cin>>from>>to>>type;
+Graph& target=(type==0)?gWalk:gCar;
+int fi=getIdIndex(target.scenes,from);
+int ti=getIdIndex(target.scenes,to);
 if(fi==-1||ti==-1){
 cout<<"编号不存在！"<<endl;
 }else{
-cout<<"请输入新的权重和类型(0步行,1车行)：";
-int weight,type;cin>>weight>>type;
-g.scenes[fi].edges[ti]={to,weight,type};
-g.scenes[ti].edges[fi]={from,weight,type};
-saveRoads(g,"data/road.txt");
+cout<<"请输入新的权重：";
+int weight;cin>>weight;
+target.scenes[fi].edges[ti].weight=weight;
+target.scenes[ti].edges[fi].weight=weight;
+saveAllRoads(gWalk,gCar,"data/road.txt");
 cout<<"道路修改成功！"<<endl;
 }
 break;

@@ -11,11 +11,9 @@ if(index==-1) return false;
 g.scenes.erase(g.scenes.begin()+index);
 
 //2. 对于剩余的景点，删除对应维度邻接矩阵的列（缩减那个元素）
-for(Scene& s :g.scenes){
-s.edges.erase(s.edges.begin()+index);
+for(int k=0;k<(int)g.scenes.size();k++){
+g.scenes[k].edges.erase(g.scenes[k].edges.begin()+index);
 }
 
-saveScenes(g,"data/scene.txt");
-saveRoads(g,"data/road.txt");
 return true;
 }

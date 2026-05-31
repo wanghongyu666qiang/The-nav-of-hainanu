@@ -11,7 +11,6 @@ if(fromIndex==-1||toIndex==-1) return false;
 if(g.scenes[fromIndex].edges[toIndex].weight!=INT_MAX){
 g.scenes[fromIndex].edges[toIndex]={to,INT_MAX,-1};
 g.scenes[toIndex].edges[fromIndex]={from,INT_MAX,-1};
-saveRoads(g,"data/road.txt");
 return true;
 }
 return false;

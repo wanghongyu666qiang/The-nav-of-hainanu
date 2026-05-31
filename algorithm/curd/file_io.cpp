@@ -36,8 +36,8 @@ g.scenes[i].edges[i].weight=0;
 return true;
 }
 
-//2. 从文件读取道路数据
-bool loadRoads(Graph& g,const string& filename){
+//2. 从文件读取道路数据(roadType:-1=全部,0=步行,1=车行)
+bool loadRoads(Graph& g,const string& filename,int roadType){
 ifstream file(filename);
 if(!file.is_open()) return false;
 
@@ -47,6 +47,8 @@ getline(file,line);
 
 int from,to,weight,type;
 while(file>>from>>to>>weight>>type){
+//过滤:只加载指定类型的道路(roadType=-1则全加载)
+if(roadType!=-1&&type!=roadType)continue;
 //因为是邻接矩阵，我们需要通过 ID 找到对应的索引
 int fromIndex=-1;for(int i=0;i<g.scenes.size();i++) if(g.scenes[i].id==from){fromIndex=i;break;};
 int toIndex=-1;for(int i=0;i<g.scenes.size();i++) if(g.scenes[i].id==to){toIndex=i;break;};
@@ -121,4 +123,28 @@ if(ti!=-1) matrixEdges[ti].weight=g.scenes[i].edges[j].weight;
 res.scenes[i].edges=matrixEdges;
 }
 return res;
+}
+
+//5. 合并保存步行图和车行图的道路到一个文件
+bool saveAllRoads(const Graph& walk,const Graph& car,const string& filename){
+ofstream file(filename);
+if(!file.is_open()) return false;
+file<<"起点\t终点\t距离\t类型\n";
+int n=(int)walk.scenes.size();
+for(int i=0;i<n;++i){
+for(int j=i+1;j<n;++j){
+//保存步行道
+if(walk.scenes[i].edges[j].weight!=INT_MAX){
+file<<walk.scenes[i].id<<"\t"<<walk.scenes[j].id<<"\t"
+<<walk.scenes[i].edges[j].weight<<"\t0\n";
+}
+//保存车行道
+if(car.scenes[i].edges[j].weight!=INT_MAX){
+file<<car.scenes[i].id<<"\t"<<car.scenes[j].id<<"\t"
+<<car.scenes[i].edges[j].weight<<"\t1\n";
+}
+}
+}
+file.close();
+return true;
 }

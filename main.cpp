@@ -1,5 +1,6 @@
 #include<iostream>
 #include "algorithm/Graph.h"
+#include "ui/render.h"
 using namespace std;
 
 int main(){
@@ -45,6 +46,8 @@ cout<<"输入的景点编号不存在！"<<endl;
 //生成对应通行权限的图并传给原封不动的算法
 Graph graphToUse=getFilteredGraph(g,userType);
 getshortestpath(graphToUse,startIndex,endIndex,userType);
+//生成地图并用浏览器打开
+renderShortestPath(g,startIndex,endIndex,userType);
 }
 break;
 }

@@ -59,7 +59,6 @@ cout<<"输入的景点编号不存在！"<<endl;
 //直接传对应类型的图,不再需要getFilteredGraph
 const Graph& active=(userType==0)?gWalk:gCar;
 getshortestpath(active,startIndex,endIndex,userType);
-renderShortestPath(gWalk,gCar,startIndex,endIndex,userType);
 }
 break;
 }

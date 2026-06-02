@@ -25,16 +25,16 @@ return string(ubuf.data());
 struct Pos{int x;int y;};
 static Pos getPos(int id){
 switch(id){
-case 1:return{120,100};//第一食堂
-case 2:return{300,80};//行政楼
-case 3:return{480,80};//二号教学楼
-case 4:return{400,200};//九教
-case 5:return{200,240};//一田
-case 6:return{320,360};//书院宿舍楼
-case 7:return{530,230};//图书馆
-case 8:return{580,370};//南门
-case 9:return{150,400};//东门
-case 10:return{440,420};//游泳池
+case 1:return{250,180};//第一食堂
+case 2:return{420,150};//行政楼
+case 3:return{320,120};//二号教学楼
+case 4:return{350,230};//九教
+case 5:return{180,300};//一田
+case 6:return{280,430};//书院宿舍楼
+case 7:return{430,290};//图书馆
+case 8:return{350,500};//南门
+case 9:return{580,200};//东门
+case 10:return{220,400};//游泳池
 default:return{0,0};
 }
 }

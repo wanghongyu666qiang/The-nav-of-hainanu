@@ -3,12 +3,13 @@
 using namespace std;
 
 bool addRoad(Graph& g,int from,int to,int weight,int type){
-int fromIndex=-1;for(int i=0;i<g.scenes.size();i++) if(g.scenes[i].id==from){fromIndex=i;break;};
-int toIndex=-1;for(int i=0;i<g.scenes.size();i++) if(g.scenes[i].id==to){toIndex=i;break;};
-if(fromIndex==-1||toIndex==-1) return false;
+int fi=getIdIndex(g.scenes,from);
+int ti=getIdIndex(g.scenes,to);
+if(fi==-1||ti==-1) return false;
 
-//ÐÞ¸ÄÁÚ½Ó¾ØÕó
-g.scenes[fromIndex].edges[toIndex]={to,weight,type};
-g.scenes[toIndex].edges[fromIndex]={from,weight,type};
+g.adj[fi][ti]=weight;
+g.roadType[fi][ti]=type;
+g.adj[ti][fi]=weight;
+g.roadType[ti][fi]=type;
 return true;
 }

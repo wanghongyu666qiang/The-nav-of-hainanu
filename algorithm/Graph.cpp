@@ -10,7 +10,7 @@ vector<int>dist(g.scenes.size());//存储距离
 vector<int>visited(g.scenes.size());//存储访问状态,0表示未访问，1表示已访问
 //全部用动态数组，防止环境报错
 for(int i=0;i<g.scenes.size();i++){
-dist[i]=g.scenes[start].edges[i].weight;
+dist[i]=g.adj[start][i];
 visited[i]=0;
 if(dist[i]==INT_MAX) path[i]=-1;
 else path[i]=start;
@@ -35,13 +35,13 @@ else
 visited[u]=1;
 
 //更新u的邻居节点的距离的for
-for(int v=0;v<g.scenes[u].edges.size();v++)
+for(int v=0;v<g.scenes.size();v++)
 {
 if(visited[v]==0)
 {
-if(dist[u]!=INT_MAX&&g.scenes[u].edges[v].weight!=INT_MAX&&dist[u]+g.scenes[u].edges[v].weight<dist[v])//健壮性加强，两个大的无穷大相加可能会溢出变成负数，所以要先判断dist[u]和g.scenes[u].edges[v].weight是否为INT_MAX
+if(dist[u]!=INT_MAX&&g.adj[u][v]!=INT_MAX&&dist[u]+g.adj[u][v]<dist[v])//健壮性加强，两个大的无穷大相加可能会溢出变成负数，所以要先判断dist[u]和g.adj[u][v]是否为INT_MAX
 {
-dist[v]=dist[u]+g.scenes[u].edges[v].weight;
+dist[v]=dist[u]+g.adj[u][v];
 path[v]=u;
 }
 }
@@ -82,14 +82,14 @@ int total=0;
 for(int i=0;i<path.size();i++){
 cout<<g.scenes[path[i]].name;
 if(i<path.size()-1){
-total+=g.scenes[path[i]].edges[path[i+1]].weight;
+total+=g.adj[path[i]][path[i+1]];
 cout<<" -> ";
 }
 }
 cout<<"   (距离: "<<total<<")"<<endl;
 } else {
 for(int v=0;v<g.scenes.size();v++){
-if(!visited[v]&&g.scenes[cur].edges[v].weight!=INT_MAX)
+if(!visited[v]&&g.adj[cur][v]!=INT_MAX)
 dfsAllPaths(g,v,end,visited,path,cnt);
 }
 }
@@ -104,4 +104,3 @@ int cnt=0;
 dfsAllPaths(g,start,end,visited,path,cnt);
 if(cnt==0) cout<<"未找到任何路径！"<<endl;
 }
-

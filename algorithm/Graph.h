@@ -4,28 +4,18 @@
 #include<string>
 #include<vector>
 #include<climits>//INT_MAX
-//这里，我们不使用using namespace std;，而是直接在需要的地方加上std::，这样可以避免命名冲突。
 
-//1. 边结构体，其实就是一个节点的邻居，包含权重和道路类型
-struct Edge {
-int to;
-int weight;
-int roadType;
-};
-
-//2. 景点结构体
 struct Scene {
 int id;
 std::string name;
 std::string description;
-std::vector<Edge>edges;
 };
 
-//3. 把所有的图数据打包进一个大结构体里，方便传来传去，数据的大心脏
 struct Graph {
-std::vector<Scene>scenes;//这个包含了每个景点的信息和他的每条边的信息（邻接表）
+std::vector<Scene>scenes;
+std::vector<std::vector<int>>adj;
+std::vector<std::vector<int>>roadType;
 };
-
 
 inline int getIdIndex(const std::vector<Scene>& scenes,int id){
 for(int i=0;i<(int)scenes.size();++i)
@@ -33,14 +23,10 @@ if(scenes[i].id==id) return i;
 return-1;
 }
 
-//后勤函数（包括增删改查） (在 curd.cpp 里)
-//传入 Graph& g 代表我们要修改这幅图
 bool loadScenes(Graph& g,const std::string& filename);
-//加载道路,roadType:-1=全部,0=步行,1=车行
 bool loadRoads(Graph& g,const std::string& filename,int roadType=-1);
 bool saveScenes(const Graph& g,const std::string& filename);
 bool saveRoads(const Graph& g,const std::string& filename);
-//合并保存两个图的道路到一个文件
 bool saveAllRoads(const Graph& walk,const Graph& car,const std::string& filename);
 bool addScene(Graph& g,int id,std::string name,std::string desc);
 bool deleteScene(Graph& g,int id);
@@ -50,10 +36,7 @@ bool deleteRoad(Graph& g,int from,int to);
 bool updateRoad(Graph& g,int from,int to,int weight,int type);
 void printScenes(const Graph& g);
 
-//算法函数 (algorithm.cpp 里)
-//传入 const Graph& g 代表算法只读取图，不修改图
 void getshortestpath(const Graph& g,int start,int end,int userType);
 void findAllPaths(const Graph& g,int start,int end);
-
 
 #endif

@@ -3,14 +3,15 @@
 using namespace std;
 
 bool deleteRoad(Graph& g,int from,int to){
-int fromIndex=-1;for(int i=0;i<g.scenes.size();i++) if(g.scenes[i].id==from){fromIndex=i;break;};
-int toIndex=-1;for(int i=0;i<g.scenes.size();i++) if(g.scenes[i].id==to){toIndex=i;break;};
-if(fromIndex==-1||toIndex==-1) return false;
+int fi=getIdIndex(g.scenes,from);
+int ti=getIdIndex(g.scenes,to);
+if(fi==-1||ti==-1) return false;
 
-//修改为邻接矩阵的删除（即距离变为 INT_MAX）
-if(g.scenes[fromIndex].edges[toIndex].weight!=INT_MAX){
-g.scenes[fromIndex].edges[toIndex]={to,INT_MAX,-1};
-g.scenes[toIndex].edges[fromIndex]={from,INT_MAX,-1};
+if(g.adj[fi][ti]!=INT_MAX){
+g.adj[fi][ti]=INT_MAX;
+g.roadType[fi][ti]=-1;
+g.adj[ti][fi]=INT_MAX;
+g.roadType[ti][fi]=-1;
 return true;
 }
 return false;

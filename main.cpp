@@ -188,8 +188,8 @@ cout<<"编号不存在！"<<endl;
 }else{
 cout<<"请输入新的权重：";
 int weight;cin>>weight;
-target.scenes[fi].edges[ti].weight=weight;
-target.scenes[ti].edges[fi].weight=weight;
+target.adj[fi][ti]=weight;
+target.adj[ti][fi]=weight;
 saveAllRoads(gWalk,gCar,"data/road.txt");
 cout<<"道路修改成功！"<<endl;
 }

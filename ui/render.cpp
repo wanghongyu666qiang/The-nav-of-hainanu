@@ -47,7 +47,7 @@ vector<int>prev(n,-1);
 vector<int>visited(n,0);
 //初始化
 for(int i=0;i<n;i++){
-dist[i]=g.scenes[start].edges[i].weight;
+dist[i]=g.adj[start][i];
 if(dist[i]!=INT_MAX)prev[i]=start;
 }
 visited[start]=1;
@@ -64,9 +64,9 @@ if(u==-1)break;
 visited[u]=1;
 for(int v=0;v<n;v++){
 if(!visited[v]&&dist[u]!=INT_MAX
-&&g.scenes[u].edges[v].weight!=INT_MAX
-&&dist[u]+g.scenes[u].edges[v].weight<dist[v]){
-dist[v]=dist[u]+g.scenes[u].edges[v].weight;
+&&g.adj[u][v]!=INT_MAX
+&&dist[u]+g.adj[u][v]<dist[v]){
+dist[v]=dist[u]+g.adj[u][v];
 prev[v]=u;
 }
 }
@@ -121,7 +121,7 @@ int n=(int)walk.scenes.size();
 for(int i=0;i<n;i++){
 for(int j=i+1;j<n;j++){
 //步行道
-if(walk.scenes[i].edges[j].weight!=INT_MAX){
+if(walk.adj[i][j]!=INT_MAX){
 Pos pi=getPos(walk.scenes[i].id);
 Pos pj=getPos(walk.scenes[j].id);
 file<<"<line x1=\""<<pi.x<<"\" y1=\""<<pi.y
@@ -130,21 +130,21 @@ file<<"<line x1=\""<<pi.x<<"\" y1=\""<<pi.y
 int mx=(pi.x+pj.x)/2;int my=(pi.y+pj.y)/2;
 file<<"<rect x=\""<<mx-10<<"\" y=\""<<my-10<<"\" width=\"20\" height=\"16\" rx=\"4\" fill=\"white\" opacity=\"0.85\"/>\n";
 file<<"<text x=\""<<mx<<"\" y=\""<<my+2<<"\" text-anchor=\"middle\" font-size=\"9\" fill=\"#999\">"
-<<walk.scenes[i].edges[j].weight<<"</text>\n";
+<<walk.adj[i][j]<<"</text>\n";
 }
 //车行道
-if(car.scenes[i].edges[j].weight!=INT_MAX){
+if(car.adj[i][j]!=INT_MAX){
 Pos pi=getPos(car.scenes[i].id);
 Pos pj=getPos(car.scenes[j].id);
 file<<"<line x1=\""<<pi.x<<"\" y1=\""<<pi.y
 <<"\" x2=\""<<pj.x<<"\" y2=\""<<pj.y
 <<"\" stroke=\"#a0a0a0\" stroke-width=\"1.5\" stroke-dasharray=\"8,4\"/>\n";
 int mx=(pi.x+pj.x)/2;int my=(pi.y+pj.y)/2;
-if(walk.scenes[i].edges[j].weight==INT_MAX){
+if(walk.adj[i][j]==INT_MAX){
 //只有车行道的路段才画车行标签
 file<<"<rect x=\""<<mx-10<<"\" y=\""<<my-10<<"\" width=\"20\" height=\"16\" rx=\"4\" fill=\"white\" opacity=\"0.85\"/>\n";
 file<<"<text x=\""<<mx<<"\" y=\""<<my+2<<"\" text-anchor=\"middle\" font-size=\"9\" fill=\"#999\">"
-<<car.scenes[i].edges[j].weight<<"</text>\n";
+<<car.adj[i][j]<<"</text>\n";
 }
 }
 }
@@ -281,7 +281,7 @@ int nn=(int)walk.scenes.size();
 for(int i=0;i<nn;i++){
 for(int j=i+1;j<nn;j++){
 //步行道
-if(walk.scenes[i].edges[j].weight!=INT_MAX){
+if(walk.adj[i][j]!=INT_MAX){
 Pos pi=getPos(walk.scenes[i].id);
 Pos pj=getPos(walk.scenes[j].id);
 file<<"<line class=\"road-walk\" data-from=\""<<i<<"\" data-to=\""<<j
@@ -291,10 +291,10 @@ file<<"<line class=\"road-walk\" data-from=\""<<i<<"\" data-to=\""<<j
 int mx=(pi.x+pj.x)/2;int my=(pi.y+pj.y)/2;
 file<<"<rect x=\""<<mx-10<<"\" y=\""<<my-10<<"\" width=\"20\" height=\"16\" rx=\"4\" fill=\"white\" opacity=\"0.85\"/>\n";
 file<<"<text x=\""<<mx<<"\" y=\""<<my+2<<"\" text-anchor=\"middle\" font-size=\"9\" fill=\"#999\">"
-<<walk.scenes[i].edges[j].weight<<"</text>\n";
+<<walk.adj[i][j]<<"</text>\n";
 }
 //车行道
-if(car.scenes[i].edges[j].weight!=INT_MAX){
+if(car.adj[i][j]!=INT_MAX){
 Pos pi=getPos(car.scenes[i].id);
 Pos pj=getPos(car.scenes[j].id);
 file<<"<line class=\"road-car\" data-from=\""<<i<<"\" data-to=\""<<j
@@ -302,10 +302,10 @@ file<<"<line class=\"road-car\" data-from=\""<<i<<"\" data-to=\""<<j
 <<"\" x2=\""<<pj.x<<"\" y2=\""<<pj.y
 <<"\" stroke=\"#a0a0a0\" stroke-width=\"1.5\" stroke-dasharray=\"8,4\"/>\n";
 int mx=(pi.x+pj.x)/2;int my=(pi.y+pj.y)/2;
-if(walk.scenes[i].edges[j].weight==INT_MAX){
+if(walk.adj[i][j]==INT_MAX){
 file<<"<rect x=\""<<mx-10<<"\" y=\""<<my-10<<"\" width=\"20\" height=\"16\" rx=\"4\" fill=\"white\" opacity=\"0.85\"/>\n";
 file<<"<text x=\""<<mx<<"\" y=\""<<my+2<<"\" text-anchor=\"middle\" font-size=\"9\" fill=\"#999\">"
-<<car.scenes[i].edges[j].weight<<"</text>\n";
+<<car.adj[i][j]<<"</text>\n";
 }
 }
 }
@@ -363,8 +363,8 @@ if(i>0)file<<",";
 file<<"[";
 for(int j=0;j<nn;j++){
 if(j>0)file<<",";
-int ww=walk.scenes[i].edges[j].weight;
-int cw=car.scenes[i].edges[j].weight;
+int ww=walk.adj[i][j];
+int cw=car.adj[i][j];
 file<<"{w:"<<(ww==INT_MAX?"Infinity":to_string(ww))
 <<",c:"<<(cw==INT_MAX?"Infinity":to_string(cw))<<"}";
 }

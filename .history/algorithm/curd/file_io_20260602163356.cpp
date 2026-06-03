@@ -4,14 +4,13 @@
 
 using namespace std;
 
-
-
-//1. 从文件读取景点数据
 bool loadScenes(Graph& g,const string& filename){
 ifstream file(filename);
 if(!file.is_open()) return false;
+
 string line;
-getline(file,line);//跳过表头
+getline(file,line);
+
 int id;
 string name,desc;
 while(file>>id>>name>>desc){
@@ -19,31 +18,31 @@ Scene s={id,name,desc};
 g.scenes.push_back(s);
 }
 file.close();
-//初始化邻接矩阵
+
 int n=(int)g.scenes.size();
 g.adj.resize(n,vector<int>(n,INT_MAX));
 g.roadType.resize(n,vector<int>(n,-1));
 for(int i=0;i<n;++i){
-g.adj[i][i]=0;//自己到自己的距离为0
+g.adj[i][i]=0;
 }
 return true;
 }
 
-
-
-//2. 从文件读取道路数据(roadType:-1=全部,0=步行,1=车行)
 bool loadRoads(Graph& g,const string& filename,int roadType){
 ifstream file(filename);
 if(!file.is_open()) return false;
+
 string line;
-getline(file,line);//跳过表头
+getline(file,line);
+
 int from,to,weight,type;
 while(file>>from>>to>>weight>>type){
 if(roadType!=-1&&type!=roadType)continue;
+
 int fi=getIdIndex(g.scenes,from);
 int ti=getIdIndex(g.scenes,to);
 if(fi==-1||ti==-1)continue;
-//双向赋值到邻接矩阵
+
 g.adj[fi][ti]=weight;
 g.roadType[fi][ti]=type;
 g.adj[ti][fi]=weight;
@@ -53,8 +52,6 @@ file.close();
 return true;
 }
 
-
-//3. 保存景点
 bool saveScenes(const Graph& g,const string& filename){
 ofstream file(filename);
 if(!file.is_open()) return false;
@@ -67,8 +64,6 @@ file.close();
 return true;
 }
 
-
-//4. 保存道路
 bool saveRoads(const Graph& g,const string& filename){
 ofstream file(filename);
 if(!file.is_open()) return false;
@@ -87,8 +82,6 @@ file.close();
 return true;
 }
 
-
-//5. 合并保存步行图和车行图的道路
 bool saveAllRoads(const Graph& walk,const Graph& car,const string& filename){
 ofstream file(filename);
 if(!file.is_open()) return false;

@@ -1,11 +1,9 @@
 #include<iostream>
 #include "algorithm/Graph.h"
-#include "ui/render.h"
 using namespace std;
 
 int main(){
 Graph gWalk,gCar;
-//加载景点(两份相同)
 if(!loadScenes(gWalk,"data/scene.txt")){
 cout<<"景点数据加载失败！"<<endl;
 return 1;
@@ -14,7 +12,6 @@ if(!loadScenes(gCar,"data/scene.txt")){
 cout<<"景点数据加载失败！"<<endl;
 return 1;
 }
-//加载道路(各取所需,互不覆盖)
 if(!loadRoads(gWalk,"data/road.txt",0)){
 cout<<"步行道路加载失败！"<<endl;
 return 1;
@@ -42,8 +39,7 @@ int choice;
 cin>>choice;
 switch(choice){
 case 0:{
-renderInteractiveMap(gWalk,gCar);
-cout<<"交互式地图已在浏览器中打开！"<<endl;
+cout<<"未引入前端模块。请使用控制台功能。"<<endl;
 break;
 }
 case 1:{
@@ -56,7 +52,6 @@ int endIndex=getIdIndex(gWalk.scenes,endId);
 if(startIndex==-1||endIndex==-1){
 cout<<"输入的景点编号不存在！"<<endl;
 }else{
-//直接传对应类型的图,不再需要getFilteredGraph
 const Graph& active=(userType==0)?gWalk:gCar;
 getshortestpath(active,startIndex,endIndex,userType);
 }
@@ -71,7 +66,6 @@ int ei=getIdIndex(gWalk.scenes,eid);
 if(si==-1||ei==-1){
 cout<<"编号不存在！"<<endl;
 }else{
-//DFS使用步行图(两种图路网不同,这里用步行为主)
 findAllPaths(gWalk,si,ei);
 }
 break;
@@ -110,7 +104,6 @@ case 5:{
 cout<<"请输入新景点的编号、名称和描述：";
 int id;string name,desc;
 cin>>id>>name>>desc;
-//同时添加到两个图
 if(addScene(gWalk,id,name,desc)&&addScene(gCar,id,name,desc)){
 saveScenes(gWalk,"data/scene.txt");
 cout<<"景点添加成功！"<<endl;
@@ -122,7 +115,6 @@ break;
 case 6:{
 cout<<"请输入要删除的景点编号：";
 int id;cin>>id;
-//从两个图同时删除
 if(deleteScene(gWalk,id)&&deleteScene(gCar,id)){
 saveScenes(gWalk,"data/scene.txt");
 saveAllRoads(gWalk,gCar,"data/road.txt");
@@ -141,7 +133,6 @@ cout<<"景点编号不存在！"<<endl;
 }else{
 cout<<"请输入新的名称和描述：";
 string name,desc;cin>>name>>desc;
-//两个图的景点数据同步修改
 gWalk.scenes[index].name=name;
 gWalk.scenes[index].description=desc;
 gCar.scenes[index].name=name;
@@ -154,7 +145,6 @@ break;
 case 8:{
 cout<<"请输入道路的起点编号、终点编号、权重和类型(0步行,1车行)：";
 int from,to,weight,type;cin>>from>>to>>weight>>type;
-//按类型添加到对应图
 Graph& target=(type==0)?gWalk:gCar;
 if(addRoad(target,from,to,weight,type)){
 saveAllRoads(gWalk,gCar,"data/road.txt");

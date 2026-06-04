@@ -69,14 +69,11 @@ cout<<endl;
 }
 
 //DFS 枚举两景点间所有路径
-void dfsAllPaths(const Graph& g,int cur,int end,vector<int>& visited,vector<int>& path,int& cnt,int what,unordered_map<int,int>& requiredPlaces){//为了后面的方便，我把这个函数的参数设计得比较多，what用来区分是普通枚举路径还是满足条件的路径，requiredPlaces是满足条件的路径需要经过的地点的哈希表
+void dfsAllPaths(const Graph& g,int cur,int end,vector<int>& visited,vector<int>& path,int& cnt){
 visited[cur]=1;
 path.push_back(cur);
 if(cur==end){
-
-if(what==0)
-{
-    cnt++;
+cnt++;
 cout<<"路径"<<cnt<<": ";
 int total=0;
 for(int i=0;i<path.size();i++){
@@ -86,44 +83,11 @@ total+=g.adj[path[i]][path[i+1]];
 cout<<" -> ";
 }
 }
-cout<<"(距离:"<<total<<")"<<endl;
-}
-//这段是用于whatyouwant函数的
-else//else if(what==1)
-{   unordered_map<int,int> temp=requiredPlaces;//先把哈希表复制一份，后面要修改这个哈希表，所以不能直接修改原来的哈希表，不然会影响后续的路径判断
-    for(int i=0;i<path.size();i++)
-    {   if(temp.find(g.scenes[path[i]].id)!=temp.end())//如果这个地点在哈希表里，才能减，我这不是数组做的哈希表，所以直接find就行了，不需要判断索引
-        temp[g.scenes[path[i]].id]--;//把路径上经过的地点在哈希表里对应的数量--，如果最后哈希表里所有值都小于1，就说明满足条件了
-    }
-    bool allLessThanOne=true;
-    for(auto it:temp)//遍历哈希表，判断是否所有值都小于1
-    {
-        if(it.second>=1)
-        {
-            allLessThanOne=false;
-            break;
-        }
-    }
-    if(allLessThanOne)//if
-    {   cnt++;
-        cout<<"满足条件的路径"<<cnt<<": ";
-        int total=0;
-        for(int i=0;i<path.size();i++){
-        cout<<g.scenes[path[i]].name;
-        if(i<path.size()-1){
-        total+=g.adj[path[i]][path[i+1]];
-        cout<<" -> ";
-        }
-        }
-        cout<<"(距离:"<<total<<")"<<endl;
-    }//if
-}//else
-
-} 
-else {
+cout<<"   (距离: "<<total<<")"<<endl;
+} else {
 for(int v=0;v<g.scenes.size();v++){
 if(!visited[v]&&g.adj[cur][v]!=INT_MAX)
-dfsAllPaths(g,v,end,visited,path,cnt,what,requiredPlaces);
+dfsAllPaths(g,v,end,visited,path,cnt);
 }
 }
 path.pop_back();
@@ -134,9 +98,7 @@ void findAllPaths(const Graph& g,int start,int end){
 vector<int>visited(g.scenes.size(),0);
 vector<int>path;
 int cnt=0;
-int what=0;//0表示普通枚举路径，1表示满足条件的路径
-unordered_map<int,int> requiredPlaces;//这个函数里不需要这个哈希表，所以传一个空的就行了
-dfsAllPaths(g,start,end,visited,path,cnt,what,requiredPlaces);
+dfsAllPaths(g,start,end,visited,path,cnt);
 if(cnt==0) cout<<"未找到任何路径！"<<endl;
 }
 
@@ -155,7 +117,7 @@ void whatyouwant(const Graph& g)
         cout<<"输入的编号无效！"<<endl;
         return;
     }
-    cout<<"请输入必经地点的数量和编号：";
+    cout<<"请输入你想经过的地点";
     int n;
     cin>>n;
     unordered_map<int,int> requiredPlaces;//用哈希表来存，到时候直接--,如果小于1，就代表经过了，要全部小于1才算满足条件
@@ -168,7 +130,6 @@ void whatyouwant(const Graph& g)
 vector<int>visited(g.scenes.size(),0);
 vector<int>path;
 int cnt=0;
-int what=1;//1表示满足条件的路径
-dfsAllPaths(g,startIndex,endIndex,visited,path,cnt,what,requiredPlaces);
-if(cnt==0) cout<<"未找到满足条件的路径！"<<endl;
+dfsAllPaths(g,startIndex,endIndex,visited,path,cnt);
+
 }

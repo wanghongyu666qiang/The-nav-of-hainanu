@@ -42,7 +42,7 @@ int choice;
 cin>>choice;
 switch(choice){
 case 0:{
-system("start ui/map_haidian.html");
+system("start ui/selection.html");
 break;
 }
 case 1:{

@@ -45,7 +45,7 @@ if(line.empty()) continue;
 istringstream iss(line);
 lights=0;
 if(!(iss>>from>>to>>weight>>type)) continue;
-iss>>lights;
+iss>>lights;//读取红绿灯数量（可选列）
 if(roadType!=-1&&type!=roadType)continue;
 int fi=getIdIndex(g.scenes,from);
 int ti=getIdIndex(g.scenes,to);
@@ -101,17 +101,17 @@ return true;
 bool saveAllRoads(const Graph& walk,const Graph& car,const string& filename){
 ofstream file(filename);
 if(!file.is_open()) return false;
-file<<"起点\t终点\t距离\t类型\t红绿灯\n";
+file<<"起点\t终点\t距离\t类型\n";
 int n=(int)walk.scenes.size();
 for(int i=0;i<n;++i){
 for(int j=i+1;j<n;++j){
 if(walk.adj[i][j]!=INT_MAX){
 file<<walk.scenes[i].id<<"\t"<<walk.scenes[j].id<<"\t"
-<<walk.adj[i][j]<<"\t0\t"<<walk.trafficLights[i][j]<<"\n";
+<<walk.adj[i][j]<<"\t0\n";
 }
 if(car.adj[i][j]!=INT_MAX){
 file<<car.scenes[i].id<<"\t"<<car.scenes[j].id<<"\t"
-<<car.adj[i][j]<<"\t1\t"<<car.trafficLights[i][j]<<"\n";
+<<car.adj[i][j]<<"\t1\n";
 }
 }
 }

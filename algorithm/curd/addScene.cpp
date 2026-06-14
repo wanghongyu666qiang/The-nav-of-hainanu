@@ -10,9 +10,11 @@ if(g.scenes[i].id==id) return false;
 int n=(int)g.scenes.size();
 g.adj.resize(n+1);
 g.roadType.resize(n+1);
+g.trafficLights.resize(n+1);
 for(int i=0;i<=n;++i){
 g.adj[i].resize(n+1,INT_MAX);
 g.roadType[i].resize(n+1,-1);
+g.trafficLights[i].resize(n+1,0);
 }
 g.adj[n][n]=0;
 

@@ -101,7 +101,7 @@ return true;
 bool saveAllRoads(const Graph& walk,const Graph& car,const string& filename){
 ofstream file(filename);
 if(!file.is_open()) return false;
-file<<"起点\t终点\t距离\t类型\t红绿灯\n";
+file<<"起点\t终点\t距离\t类型\n";
 int n=(int)walk.scenes.size();
 for(int i=0;i<n;++i){
 for(int j=i+1;j<n;++j){

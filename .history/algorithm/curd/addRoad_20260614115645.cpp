@@ -2,7 +2,7 @@
 
 using namespace std;
 
-bool addRoad(Graph& g,int from,int to,int weight,int type,int lights){
+bool addRoad(Graph& g,int from,int to,int weight,int type,int lights=0){
 int fi=getIdIndex(g.scenes,from);
 int ti=getIdIndex(g.scenes,to);
 if(fi==-1||ti==-1) return false;

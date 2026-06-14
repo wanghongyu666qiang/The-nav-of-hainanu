@@ -152,10 +152,11 @@ cout<<"景点修改成功！"<<endl;
 break;
 }
 case 9:{
-cout<<"请输入道路的起点编号、终点编号、权重和类型(0步行,1车行)：";
-int from,to,weight,type;cin>>from>>to>>weight>>type;
+cout<<"请输入道路的起点编号、终点编号、权重、类型(0步行,1车行)和红绿灯数量：";
+int from,to,weight,type,lights=0;cin>>from>>to>>weight>>type;
+cin>>lights;
 Graph& target=(type==0)?gWalk:gCar;
-if(addRoad(target,from,to,weight,type)){
+if(addRoad(target,from,to,weight,type,lights)){
 saveAllRoads(gWalk,gCar,"data/road.txt");
 cout<<"道路添加成功！"<<endl;
 }else{

@@ -45,7 +45,7 @@ if(line.empty()) continue;
 istringstream iss(line);
 lights=0;
 if(!(iss>>from>>to>>weight>>type)) continue;
-iss>>lights;
+iss>>lights;//读取红绿灯数量（可选列）
 if(roadType!=-1&&type!=roadType)continue;
 int fi=getIdIndex(g.scenes,from);
 int ti=getIdIndex(g.scenes,to);

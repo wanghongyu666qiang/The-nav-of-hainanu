@@ -11,9 +11,11 @@ g.scenes.erase(g.scenes.begin()+index);
 
 g.adj.erase(g.adj.begin()+index);
 g.roadType.erase(g.roadType.begin()+index);
+g.trafficLights.erase(g.trafficLights.begin()+index);
 for(int k=0;k<(int)g.scenes.size();k++){
 g.adj[k].erase(g.adj[k].begin()+index);
 g.roadType[k].erase(g.roadType[k].begin()+index);
+g.trafficLights[k].erase(g.trafficLights[k].begin()+index);
 }
 return true;
 }

@@ -10,8 +10,10 @@ if(fi==-1||ti==-1) return false;
 if(g.adj[fi][ti]!=INT_MAX){
 g.adj[fi][ti]=INT_MAX;
 g.roadType[fi][ti]=-1;
+g.trafficLights[fi][ti]=0;
 g.adj[ti][fi]=INT_MAX;
 g.roadType[ti][fi]=-1;
+g.trafficLights[ti][fi]=0;
 return true;
 }
 return false;

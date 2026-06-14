@@ -15,7 +15,7 @@ struct Graph {
 std::vector<Scene>scenes;//存储景点信息
 std::vector<std::vector<int>>adj;//邻接矩阵，存储权重
 std::vector<std::vector<int>>roadType;//存储道路类型，-1=无路,0=步行,1=车行，2=两者皆可
-std::vector<std::vector<int>>trafficLights;//traffic lights count
+std::vector<std::vector<int>>trafficLights;//存储红绿灯数量
 };
 
 inline int getIdIndex(const std::vector<Scene>& scenes,int id){

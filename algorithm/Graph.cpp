@@ -65,6 +65,12 @@ for(int i=0;i<result.size();i++){
 cout<<g.scenes[result[i]].name<<" ";
 }
 cout<<endl;
+//count traffic lights
+int totalLights=0;
+for(int i=0;i<(int)result.size()-1;i++){
+totalLights+=g.trafficLights[result[i]][result[i+1]];
+}
+cout<<"traffic lights: "<<totalLights<<endl;
 }
 }
 

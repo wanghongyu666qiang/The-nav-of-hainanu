@@ -22,7 +22,6 @@ cout<<"车行道路加载失败！"<<endl;
 return 1;
 }
 
-startHttpServer(gWalk, gCar);//启动http服务器
 
 while(true){
     cout<<"------------------------------"<<endl;

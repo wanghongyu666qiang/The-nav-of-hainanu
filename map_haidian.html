@@ -224,11 +224,7 @@ document.getElementById('btnConditional').onclick = function() {
   var wpVal = parseInt(wpSel.value);
   if (!wpVal) { logError('请选择一个必经地点！'); return; }
   selectedWp.push(wpVal);
-  
-  if (selectedWp.length === 0) {
-    logError('请至少选择一个必经地点！');
-    return;
-  }
+
   if (startId === endId) {
     logError('起点和终点不能相同！');
     return;

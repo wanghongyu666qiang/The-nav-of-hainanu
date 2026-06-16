@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>海南大学导航系统</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: "Microsoft YaHei", sans-serif; background: #f0f2f5; min-height: 100vh; }
+.header { background: linear-gradient(135deg, #1a5276, #2980b9); color: white; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
+.header h1 { font-size: 20px; }
+.header a { color: white; text-decoration: none; font-size: 14px; opacity: 0.8; }
+.header a:hover { opacity: 1; }
+.container { display: flex; height: calc(100vh - 56px); }
+.map-panel { flex: 1; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #000; }
+.map-panel img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.right-panel { width: 380px; background: white; padding: 20px; overflow-y: auto; border-left: 1px solid #e0e0e0; display: flex; flex-direction: column; }
+.right-panel h2 { font-size: 16px; margin-bottom: 16px; color: #333; }
+.query-section { flex-shrink: 0; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #eee; }
+.form-group { margin-bottom: 12px; }
+.form-group label { display: block; font-size: 13px; color: #666; margin-bottom: 4px; }
+.form-group select, .form-group input { width: 100%; padding: 8px 10px; border: 1px solid #d0d0d0; border-radius: 4px; font-size: 13px; }
+.form-group select:focus, .form-group input:focus { outline: none; border-color: #2980b9; }
+.radio-group { display: flex; gap: 16px; margin-top: 4px; }
+.radio-group label { font-size: 13px; cursor: pointer; }
+.radio-group input { width: auto; margin-right: 4px; }
+.btn { width: 100%; padding: 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; margin-bottom: 8px; transition: background 0.2s; }
+.btn-primary { background: #2980b9; color: white; }
+.btn-primary:hover { background: #2471a3; }
+.btn-secondary { background: #27ae60; color: white; }
+.btn-secondary:hover { background: #229954; }
+.btn-warn { background: #e67e22; color: white; }
+.btn-warn:hover { background: #d35400; }
+.btn-info { background: #8e44ad; color: white; }
+.btn-info:hover { background: #7d3c98; }
+.btn:disabled { background: #bdc3c7; cursor: not-allowed; }
+.result { background: #1e1e1e; color: #d4d4d4; padding: 16px; border-radius: 6px; font-family: "Consolas", "Courier New", monospace; font-size: 13px; line-height: 1.6; white-space: pre-wrap; min-height: 200px; flex: 1; overflow-y: auto; }
+.result.error { color: #e74c3c; }
+.waypoints { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.waypoints input { width: 80px !important; }
+.tag { background: #e8f4fd; color: #2980b9; padding: 2px 8px; border-radius: 3px; font-size: 12px; display: inline-block; margin: 2px; }
+.stats { display: flex; gap: 12px; margin-bottom: 16px; }
+.stat { background: white; padding: 12px 16px; border-radius: 6px; text-align: center; flex: 1; }
+.stat .num { font-size: 24px; font-weight: bold; color: #2980b9; }
+.stat .label { font-size: 12px; color: #999; margin-top: 4px; }
+.section-title { font-size: 14px; color: #333; margin: 12px 0 8px; padding-bottom: 6px; border-bottom: 1px solid #eee; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>海南大学多校区导航系统</h1>
+  <a href="selection.html">← 返回校区选择</a>
+</div>
+<div class="container">
+  <div class="map-panel">
+    <img src="data/haidian.jpg" alt="海甸校区地图">
+  </div>
+  <div class="right-panel">
+    <div class="query-section">
+      <h2>路径查询</h2>
+
+      <div class="stats" id="stats">
+        <div class="stat"><div class="num" id="sceneCount">-</div><div class="label">景点数</div></div>
+        <div class="stat"><div class="num" id="roadCount">-</div><div class="label">道路数</div></div>
+      </div>
+
+      <div class="section-title">步行 / 驾车</div>
+      <div class="form-group">
+        <div class="radio-group">
+          <label><input type="radio" name="userType" value="0" checked> 步行</label>
+          <label><input type="radio" name="userType" value="1"> 驾车</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>起点</label>
+        <select id="startSelect"></select>
+      </div>
+      <div class="form-group">
+        <label>终点</label>
+        <select id="endSelect"></select>
+      </div>
+
+      <button class="btn btn-primary" id="btnShortest" disabled>查询最短路径</button>
+      <button class="btn btn-secondary" id="btnAllPaths" disabled>查询所有路径</button>
+
+      <div class="section-title">必经地点筛选</div>
+      <div class="form-group">
+        <label>必经地点</label>
+        <select id="waypointSelect"></select>
+      </div>
+      <button class="btn btn-warn" id="btnConditional" disabled>查询必经路径</button>
+      <button class="btn btn-info" id="btnScenes">查看所有景点</button>
+    </div>
+    <div class="result" id="output">正在初始化导航系统...</div>
+  </div>
+</div>
+
+<script src="nav.js"></script>
+<script>
+// 景点数据（编译时从 scene.txt 构建）
+var scenes = [];
+var outputEl = document.getElementById('output');
+var startSel = document.getElementById('startSelect');
+var endSel = document.getElementById('endSelect');
+var wpSel = document.getElementById('waypointSelect');
+
+function log(msg) {
+  outputEl.textContent = msg;
+  outputEl.className = 'result';
+}
+
+function logError(msg) {
+  outputEl.textContent = msg;
+  outputEl.className = 'result error';
+}
+
+// Emscripten 初始化完成后
+Module.onRuntimeInitialized = function() {
+  log('正在加载地图数据...');
+  
+  // 初始化双图
+  Module.ccall('initGraphs', null, [], []);
+  
+  // 加载景点列表
+  var scenesRaw = Module.ccall('getScenesList', 'string', [], []);
+  console.log('Scenes raw:', scenesRaw);
+  
+  // 解析景点列表（格式来自 printScenes）
+  parseScenes(scenesRaw);
+  
+  // 启用按钮
+  document.getElementById('btnShortest').disabled = false;
+  document.getElementById('btnAllPaths').disabled = false;
+  document.getElementById('btnConditional').disabled = false;
+  
+  updateStats();
+  log('请选择起点和终点开始查询');
+};
+
+function parseScenes(raw) {
+  // 清理：提取 "编号\t名称\t描述" 后面的数据行
+  var lines = raw.split('\n');
+  scenes = [];
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i].trim();
+    // 匹配格式: "ID\t名称\t描述"
+    var parts = line.split('\t');
+    if (parts.length >= 3 && /^\d+$/.test(parts[0])) {
+      scenes.push({ id: parseInt(parts[0]), name: parts[1], desc: parts[2] });
+    }
+  }
+  
+  // 填充下拉框
+  var opts = '';
+  for (var i = 0; i < scenes.length; i++) {
+    opts += '<option value="' + scenes[i].id + '">' + scenes[i].id + ' - ' + scenes[i].name + '</option>';
+  }
+  startSel.innerHTML = opts;
+  endSel.innerHTML = opts;
+  wpSel.innerHTML = '<option value="">-- 请选择 --</option>' + opts;
+  
+  document.getElementById('sceneCount').textContent = scenes.length;
+}
+
+function updateStats() {
+  // 粗略统计道路数（从数据）
+  var roadCount = 50; // 已知 road.txt 有 50 条
+  document.getElementById('roadCount').textContent = roadCount;
+}
+
+// 获取选中的 userType
+function getUserType() {
+  var radios = document.getElementsByName('userType');
+  for (var i = 0; i < radios.length; i++) {
+    if (radios[i].checked) return parseInt(radios[i].value);
+  }
+  return 0;
+}
+
+// 查询最短路径
+document.getElementById('btnShortest').onclick = function() {
+  var startId = parseInt(startSel.value);
+  var endId = parseInt(endSel.value);
+  var userType = getUserType();
+  
+  if (startId === endId) {
+    logError('起点和终点不能相同！');
+    return;
+  }
+  
+  log('查询中...');
+  var result = Module.ccall('getShortestPath', 'string', ['number','number','number'], [startId, endId, userType]);
+  log('=== 最短路径查询 ===\n起点: ' + getSceneName(startId) + '\n终点: ' + getSceneName(endId) + '\n方式: ' + (userType===0?'步行':'驾车') + '\n\n' + result);
+};
+
+// 查询所有路径
+document.getElementById('btnAllPaths').onclick = function() {
+  var startId = parseInt(startSel.value);
+  var endId = parseInt(endSel.value);
+  
+  if (startId === endId) {
+    logError('起点和终点不能相同！');
+    return;
+  }
+  
+  log('查询中（可能较慢，请稍候）...');
+  var result = Module.ccall('findAllWebPaths', 'string', ['number','number'], [startId, endId]);
+  log('=== 所有路径 ===\n起点: ' + getSceneName(startId) + '\n终点: ' + getSceneName(endId) + '\n\n' + result);
+};
+
+// 查询必经路径
+document.getElementById('btnConditional').onclick = function() {
+  var startId = parseInt(startSel.value);
+  var endId = parseInt(endSel.value);
+  var userType = getUserType();
+  
+  var selectedWp = [];
+  var wpVal = parseInt(wpSel.value);
+  if (!wpVal) { logError('请选择一个必经地点！'); return; }
+  selectedWp.push(wpVal);
+  
+  if (selectedWp.length === 0) {
+    logError('请至少选择一个必经地点！');
+    return;
+  }
+  if (startId === endId) {
+    logError('起点和终点不能相同！');
+    return;
+  }
+  
+  log('查询中...');
+  
+  // 构建 C int 数组（通过堆内存）
+  var n = selectedWp.length;
+  var ptr = Module._malloc(n * 4); // 4 bytes per int
+  for (var i = 0; i < n; i++) {
+    Module.setValue(ptr + i * 4, selectedWp[i], 'i32');
+  }
+  
+  var result = Module.ccall('getConditionalPaths', 'string', ['number','number','number','number','number'], [startId, endId, userType, ptr, n]);
+  Module._free(ptr);
+  
+  log('=== 必经地点路径筛选 ===\n起点: ' + getSceneName(startId) + '\n终点: ' + getSceneName(endId) + '\n方式: ' + (userType===0?'步行':'驾车') + '\n必经: ' + selectedWp.map(function(id){return getSceneName(id);}).join(', ') + '\n\n' + result);
+};
+
+// 查看景点列表
+document.getElementById('btnScenes').onclick = function() {
+  log('加载中...');
+  var result = Module.ccall('getScenesList', 'string', [], []);
+  log('=== 景点列表 ===\n\n' + result);
+};
+
+function getSceneName(id) {
+  for (var i = 0; i < scenes.length; i++) {
+    if (scenes[i].id === id) return scenes[i].name + '(' + id + ')';
+  }
+  return '未知(' + id + ')';
+}
+</script>
+</body>
+</html>

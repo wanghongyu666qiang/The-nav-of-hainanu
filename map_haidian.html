@@ -188,12 +188,7 @@ document.getElementById('btnShortest').onclick = function() {
   var startId = parseInt(startSel.value);
   var endId = parseInt(endSel.value);
   var userType = getUserType();
-  
-  if (startId === endId) {
-    logError('起点和终点不能相同！');
-    return;
-  }
-  
+
   log('查询中...');
   var result = Module.ccall('getShortestPath', 'string', ['number','number','number'], [startId, endId, userType]);
   log('=== 最短路径查询 ===\n起点: ' + getSceneName(startId) + '\n终点: ' + getSceneName(endId) + '\n方式: ' + (userType===0?'步行':'驾车') + '\n\n' + result);
@@ -203,12 +198,7 @@ document.getElementById('btnShortest').onclick = function() {
 document.getElementById('btnAllPaths').onclick = function() {
   var startId = parseInt(startSel.value);
   var endId = parseInt(endSel.value);
-  
-  if (startId === endId) {
-    logError('起点和终点不能相同！');
-    return;
-  }
-  
+
   log('查询中（可能较慢，请稍候）...');
   var result = Module.ccall('findAllWebPaths', 'string', ['number','number'], [startId, endId]);
   log('=== 所有路径 ===\n起点: ' + getSceneName(startId) + '\n终点: ' + getSceneName(endId) + '\n\n' + result);
@@ -225,11 +215,6 @@ document.getElementById('btnConditional').onclick = function() {
   if (!wpVal) { logError('请选择一个必经地点！'); return; }
   selectedWp.push(wpVal);
 
-  if (startId === endId) {
-    logError('起点和终点不能相同！');
-    return;
-  }
-  
   log('查询中...');
   
   // 构建 C int 数组（通过堆内存）

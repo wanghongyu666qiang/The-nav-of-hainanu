@@ -98,6 +98,9 @@ body { font-family: "Microsoft YaHei", sans-serif; background: #f0f2f5; min-heig
 
 <script src="nav.js"></script>
 <script>
+/* eslint-disable */
+// @ts-nocheck
+/** @global Module - defined in nav.js (Emscripten) */
 // 景点数据（编译时从 scene.txt 构建）
 var scenes = [];
 var outputEl = document.getElementById('output');

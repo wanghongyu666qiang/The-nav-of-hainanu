@@ -1,18 +1,26 @@
 <!doctype html>
-<mata charset="gbk" />
 <html>
-  <head>
-    <meta charset="gbk" />
-    <title>瞻州校区地图</title>
-  </head>
-  <body>
-    <button>
-      <a href="selection.html">← 返回校区选择</a>
-    </button>
-    <img
-      src="../data/zhanzuo.jpg"
-      style="width: 100%; max-width: 1200px"
-      alt="校园地图"
-    />
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <title>鍎嬪窞鏍″尯鍦板浘</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: "Microsoft YaHei", sans-serif; background: #f0f2f5; min-height: 100vh; }
+    .header { background: linear-gradient(135deg, #1a5276, #2980b9); color: white; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
+    .header h1 { font-size: 20px; }
+    .header a { color: white; text-decoration: none; font-size: 14px; opacity: 0.8; }
+    .header a:hover { opacity: 1; }
+    .main { display: flex; justify-content: center; padding: 20px; }
+    .main img { max-width: 100%; max-height: calc(100vh - 100px); border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>鍎嬪窞鏍″尯</h1>
+    <a href="selection.html">鈫� 杩斿洖鏍″尯閫夋嫨</a>
+  </div>
+  <div class="main">
+    <img src="data/zhanzuo.jpg" alt="鍎嬪窞鏍″尯鍦板浘" />
+  </div>
+</body>
 </html>

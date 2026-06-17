@@ -1,30 +1,146 @@
-<!doctype html>
-<html>
-  <head>
-    <meta charset="gbk" />
-    <title>haidian</title>
-  </head>
-  <body>
-    <button>
-      <a href="selection.html">�� ����У��ѡ��</a>
-    </button>
-    <img
-      src="../data/haidian.jpg"
-      style="width: 100%; max-width: 1200px"
-      alt="У԰��ͼ"
-    />
-    <aside>
-      <form>
-        <label for="search1">��һ</label>
-        <input id="search1" type="text" />
-        <br />
-        <label for="search2">���</label>
-        <input id="search2" type="text" />
-        <br />
-        <button type="submit">���·��</button>
-        <button type="submit">����·��</button>
-      </form>
-    </aside>
-    <div id="result"></div>
-  </body>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>海南大学导航系统</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: "Microsoft YaHei", sans-serif; background: #f0f2f5; min-height: 100vh; }
+.header { background: linear-gradient(135deg, #1a5276, #2980b9); color: white; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
+.header h1 { font-size: 20px; }
+.header a { color: white; text-decoration: none; font-size: 14px; opacity: 0.8; }
+.header a:hover { opacity: 1; }
+.container { display: flex; height: calc(100vh - 56px); }
+.map-panel { flex: 1; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #000; }
+.map-panel img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.right-panel { width: 380px; background: white; padding: 20px; overflow-y: auto; border-left: 1px solid #e0e0e0; display: flex; flex-direction: column; }
+.right-panel h2 { font-size: 16px; margin-bottom: 16px; color: #333; }
+.query-section { flex-shrink: 0; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #eee; }
+.form-group { margin-bottom: 12px; }
+.form-group label { display: block; font-size: 13px; color: #666; margin-bottom: 4px; }
+.form-group select { width: 100%; padding: 8px 10px; border: 1px solid #d0d0d0; border-radius: 4px; font-size: 13px; }
+.form-group select:focus { outline: none; border-color: #2980b9; }
+.radio-group { display: flex; gap: 16px; margin-top: 4px; }
+.radio-group label { font-size: 13px; cursor: pointer; }
+.radio-group input { width: auto; margin-right: 4px; }
+.btn { width: 100%; padding: 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; margin-bottom: 8px; transition: background 0.2s; }
+.btn-primary { background: #2980b9; color: white; }
+.btn-primary:hover { background: #2471a3; }
+.btn-secondary { background: #27ae60; color: white; }
+.btn-secondary:hover { background: #229954; }
+.btn-warn { background: #e67e22; color: white; }
+.btn-warn:hover { background: #d35400; }
+.btn-info { background: #8e44ad; color: white; }
+.btn-info:hover { background: #7d3c98; }
+.btn:disabled { background: #bdc3c7; cursor: not-allowed; }
+.result { background: #1e1e1e; color: #d4d4d4; padding: 16px; border-radius: 6px; font-family: "Consolas", "Courier New", monospace; font-size: 13px; line-height: 1.6; white-space: pre-wrap; min-height: 200px; flex: 1; overflow-y: auto; }
+.section-title { font-size: 14px; color: #333; margin: 12px 0 8px; padding-bottom: 6px; border-bottom: 1px solid #eee; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>海南大学多校区导航系统</h1>
+  <a href="selection.html">← 返回校区选择</a>
+</div>
+<div class="container">
+  <div class="map-panel">
+    <img src="data/haidian.jpg" alt="海甸校区地图">
+  </div>
+  <div class="right-panel">
+    <div class="query-section">
+      <h2>路径查询</h2>
+
+      <div class="section-title">步行 / 驾车</div>
+      <div class="form-group">
+        <div class="radio-group">
+          <label><input type="radio" name="userType" value="0" checked> 步行</label>
+          <label><input type="radio" name="userType" value="1"> 驾车</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>起点</label>
+        <select id="startSelect"></select>
+      </div>
+      <div class="form-group">
+        <label>终点</label>
+        <select id="endSelect"></select>
+      </div>
+
+      <button class="btn btn-primary" id="btnShortest" disabled>查询最短路径</button>
+      <button class="btn btn-secondary" id="btnAllPaths" disabled>查询所有路径</button>
+
+      <div class="section-title">必经地点筛选</div>
+      <div class="form-group">
+        <label>必经地点</label>
+        <select id="waypointSelect"></select>
+      </div>
+      <button class="btn btn-warn" id="btnConditional" disabled>查询必经路径</button>
+      <button class="btn btn-info" id="btnScenes">查看所有景点</button>
+    </div>
+    <div class="result" id="output">正在初始化导航系统...</div>
+  </div>
+</div>
+
+<script src="nav.js"></script>
+<script>
+/* eslint-disable */
+var scenes = [], startSel = document.getElementById('startSelect'), endSel = document.getElementById('endSelect'), wpSel = document.getElementById('waypointSelect');
+
+function log(msg) { var el = document.getElementById('output'); el.textContent = msg; el.className = 'result'; }
+
+Module.onRuntimeInitialized = function() {
+  Module.ccall('initGraphs', null, [], []);
+  parseScenes(Module.ccall('getScenesList', 'string', [], []));
+  ['btnShortest','btnAllPaths','btnConditional'].forEach(function(id) { document.getElementById(id).disabled = false; });
+  log('请选择起点和终点开始查询');
+};
+
+function parseScenes(raw) {
+  scenes = [];
+  raw.split('\n').forEach(function(line) {
+    var p = line.trim().split('\t');
+    if (p.length >= 3 && /^\d+$/.test(p[0])) scenes.push({ id: +p[0], name: p[1] });
+  });
+  var opts = scenes.reduce(function(s, v) { return s + '<option value="' + v.id + '">' + v.id + ' - ' + v.name + '</option>'; }, '');
+  startSel.innerHTML = opts;
+  endSel.innerHTML = opts;
+  wpSel.innerHTML = '<option value="">-- 请选择 --</option>' + opts;
+}
+
+function getUserType() { return +document.querySelector('input[name=userType]:checked').value; }
+
+function getIds() { return { start: +startSel.value, end: +endSel.value, type: getUserType() }; }
+
+function getSceneName(id) {
+  for (var i = 0; i < scenes.length; i++) if (scenes[i].id === id) return scenes[i].name + '(' + id + ')';
+  return '未知(' + id + ')';
+}
+
+document.getElementById('btnShortest').onclick = function() {
+  var v = getIds();
+  log('=== 最短路径 ===\n起点: ' + getSceneName(v.start) + '\n终点: ' + getSceneName(v.end) + '\n方式: ' + (v.type?'驾车':'步行') + '\n\n' + Module.ccall('getShortestPath', 'string', ['number','number','number'], [v.start, v.end, v.type]));
+};
+
+document.getElementById('btnAllPaths').onclick = function() {
+  var v = getIds();
+  log('=== 所有路径 ===\n起点: ' + getSceneName(v.start) + '\n终点: ' + getSceneName(v.end) + '\n\n' + Module.ccall('findAllWebPaths', 'string', ['number','number'], [v.start, v.end]));
+};
+
+document.getElementById('btnConditional').onclick = function() {
+  var v = getIds(), wp = +wpSel.value;
+  if (!wp) { log('请选择一个必经地点！'); return; }
+  var ptr = Module._malloc(4);
+  Module.setValue(ptr, wp, 'i32');
+  var result = Module.ccall('getConditionalPaths', 'string', ['number','number','number','number','number'], [v.start, v.end, v.type, ptr, 1]);
+  Module._free(ptr);
+  log('=== 必经地点路径 ===\n起点: ' + getSceneName(v.start) + '\n终点: ' + getSceneName(v.end) + '\n必经: ' + getSceneName(wp) + '\n\n' + result);
+};
+
+document.getElementById('btnScenes').onclick = function() {
+  log('=== 景点列表 ===\n\n' + Module.ccall('getScenesList', 'string', [], []));
+};
+</script>
+</body>
 </html>

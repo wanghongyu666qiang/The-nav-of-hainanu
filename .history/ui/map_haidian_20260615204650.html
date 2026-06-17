@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="gbk" />
+    <title>haidian</title>
+    <style>
+      aside {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background-color: rgba(255, 255, 255, 0.9);
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      }
+    </style>
+  </head>
+  <body>
+    <button>
+      <a href="selection.html">← 返回校区选择</a>
+    </button>
+    <img
+      src="../data/haidian.jpg"
+      style="width: 100%; max-width: 1200px"
+      alt="校园地图"
+    />
+    <aside>
+      <form>
+        <label for="search1">点一</label>
+        <input id="search1" type="text" />
+        <br />
+        <label for="search2">点二</label>
+        <input id="search2" type="text" />
+        <br />
+        <button type="submit">最短路径</button>
+        <button type="submit">所有路径</button>
+      </form>
+    </aside>
+    <div id="result"></div>
+  </body>
+</html>

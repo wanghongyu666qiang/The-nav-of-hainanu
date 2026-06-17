@@ -35,14 +35,6 @@ body { font-family: "Microsoft YaHei", sans-serif; background: #f0f2f5; min-heig
 .btn-info:hover { background: #7d3c98; }
 .btn:disabled { background: #bdc3c7; cursor: not-allowed; }
 .result { background: #1e1e1e; color: #d4d4d4; padding: 16px; border-radius: 6px; font-family: "Consolas", "Courier New", monospace; font-size: 13px; line-height: 1.6; white-space: pre-wrap; min-height: 200px; flex: 1; overflow-y: auto; }
-.result.error { color: #e74c3c; }
-.waypoints { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.waypoints input { width: 80px !important; }
-.tag { background: #e8f4fd; color: #2980b9; padding: 2px 8px; border-radius: 3px; font-size: 12px; display: inline-block; margin: 2px; }
-.stats { display: flex; gap: 12px; margin-bottom: 16px; }
-.stat { background: white; padding: 12px 16px; border-radius: 6px; text-align: center; flex: 1; }
-.stat .num { font-size: 24px; font-weight: bold; color: #2980b9; }
-.stat .label { font-size: 12px; color: #999; margin-top: 4px; }
 .section-title { font-size: 14px; color: #333; margin: 12px 0 8px; padding-bottom: 6px; border-bottom: 1px solid #eee; }
 </style>
 </head>
@@ -58,11 +50,6 @@ body { font-family: "Microsoft YaHei", sans-serif; background: #f0f2f5; min-heig
   <div class="right-panel">
     <div class="query-section">
       <h2>路径查询</h2>
-
-      <div class="stats" id="stats">
-        <div class="stat"><div class="num" id="sceneCount">-</div><div class="label">景点数</div></div>
-        <div class="stat"><div class="num" id="roadCount">-</div><div class="label">道路数</div></div>
-      </div>
 
       <div class="section-title">步行 / 驾车</div>
       <div class="form-group">
@@ -120,8 +107,6 @@ function parseScenes(raw) {
   startSel.innerHTML = opts;
   endSel.innerHTML = opts;
   wpSel.innerHTML = '<option value="">-- 请选择 --</option>' + opts;
-  document.getElementById('sceneCount').textContent = scenes.length;
-  document.getElementById('roadCount').textContent = '50';
 }
 
 function getUserType() { return +document.querySelector('input[name=userType]:checked').value; }
